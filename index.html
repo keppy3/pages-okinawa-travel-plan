@@ -163,6 +163,7 @@ h2.sec small { font-family: var(--font-body); font-size: .8rem; color: var(--mut
 .chip-s.cand { background: var(--a-ishi-soft); color: var(--a-ishi); }
 .chip-s.rsv { background: var(--warn-soft); color: var(--warn); }
 .chip-s.in { background: var(--rain-soft); color: var(--rain); }
+.chip-s.sunc { background: var(--sun-soft); color: var(--sun); }
 .day-foot { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; border-top: 1px solid var(--line); padding-top: 8px; }
 
 /* 天気チップ */
@@ -570,8 +571,8 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       <section>
         <h2 class="sec">モデルコース <small>日をクリックすると地図にルートが出ます</small></h2>
         <div class="course-switch" role="group" aria-label="コースを選ぶ">
-          <button type="button" id="course-btn-A" data-course="A" aria-pressed="true"><span class="course-tag">おすすめ</span> A. 竹富島は25日の午後</button>
-          <button type="button" id="course-btn-B" data-course="B" aria-pressed="false"><span class="course-tag alt">別案</span> B. 竹富島は26日（当初どおり）</button>
+          <button type="button" id="course-btn-A" data-course="A" aria-pressed="true"><span class="course-tag">おすすめ</span> A. 初日は沖縄ワールドだけ（ゆったり）</button>
+          <button type="button" id="course-btn-B" data-course="B" aria-pressed="false"><span class="course-tag alt">別案</span> B. 初日は東海岸の島めぐり</button>
         </div>
         <p class="course-sum" id="course-sum"></p>
         <div id="course-days" class="course-days"></div>
@@ -716,6 +717,12 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
   <section>
     <h2 class="sec">予約・条件がある場所</h2>
     <div class="notes">
+      <div class="note mid"><span class="lv">まとめ</span><b>予約が必要なのは「ひとし」だけ</b>
+        <ul>
+          <li>モデルコースで予約が必要なのは、25日夜の「ひとし」（石垣の居酒屋）だけ。ほかはすべて予約なしで入れる。</li>
+          <li>ほかに予約が要るのは、首里城の正殿の中（今回は見ない）、ガンガラーの谷（コースから外した）、宮良川のカヌー・星空・西表島などのツアー（入れていない）。</li>
+          <li>予約しておくと安心：ビーフィーズ（23日夜）、民謡ライブのある店（ぱいかじ・とぅばらーま）。</li>
+        </ul></div>
       <div class="note high"><span class="lv">首里城</span><b>11/22は終日休園、11/23は有料区域が12:00から</b>
         <ul>
           <li>11/22は正殿の復元完成式のため終日休園です。</li>
@@ -891,6 +898,17 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       loc: '今帰仁村', q: '今帰仁城跡',
       note: '美ら海から車で約15分なので同じ日に入れやすい。8:00〜18:00（最終入城17:30）。',
       img: W + '7/7d/Nakijin_Okinawa_Japan_Nakikjin-Castle-01.jpg/500px-Nakijin_Okinawa_Japan_Nakikjin-Castle-01.jpg' },
+    { name: '古宇利島（古宇利大橋）', pri: 'want', area: 'north', cat: 'island', lat: 26.6960, lng: 128.0240, approx: true,
+      loc: '今帰仁村古宇利（那覇空港から約1時間40分）', q: '古宇利大橋',
+      note: '全長約2kmの古宇利大橋を渡る海の上のドライブが名物。島内にハートロック（ティーヌ浜）やカフェ。島内は1〜2時間が目安。晴れの日向き。',
+      img: W + '0/08/View_of_Kouri_Ohashi_from_road.JPG/500px-View_of_Kouri_Ohashi_from_road.JPG' },
+    { name: '果報バンタ', pri: 'want', area: 'central', cat: 'nature', lat: 26.3630, lng: 127.9790, approx: true,
+      loc: 'うるま市宮城島（ぬちまーす観光製塩ファクトリー内）', q: '果報バンタ',
+      note: '断崖から真っ青な海を見下ろす展望台。入場無料・駐車場無料。光の反射が少ない午後がきれい。海中道路から約20分。', img: '' },
+    { name: '海中道路・浜比嘉島', pri: 'low', area: 'central', cat: 'island', lat: 26.3285, lng: 127.9550, approx: true,
+      loc: 'うるま市（勝連城跡から車で約15分）', q: '海の駅あやはし館',
+      note: '海の上を約5km走る無料の道路と、その先の小さな島。勝連城跡・果報バンタとセットで。',
+      img: W + 'a/a4/Kaichu-Doro.jpg/500px-Kaichu-Doro.jpg' },
 
     /* ---- 石垣の追加スポット ---- */
     { name: '石垣市立八重山博物館', pri: 'want', area: 'ishi', cat: 'aqua', rain: true, lat: 24.3381, lng: 124.1596,
@@ -955,7 +973,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     { name: '土夢 ごはんカフェ', pri: 'want', area: 'south', cat: 'food', lat: 26.1530, lng: 127.6720, approx: true,
       loc: '糸満市（西崎店・琉球ガラス村店の2店舗）', q: '土夢 ごはんカフェ 西崎店', link: 'https://retty.me/restaurant/100001013249/',
       note: 'カフェごはん。ガラス村店は11:00〜17:00・水曜休。南部（ガンガラーの谷・玉泉洞）の日の昼食向き。' },
-    { name: 'A&W（牧港店）', pri: 'want', area: 'central', cat: 'food', rain: true, lat: 26.2618, lng: 127.7165, approx: true,
+    { name: 'A&W（牧港店）', pri: 'must', area: 'central', cat: 'food', rain: true, lat: 26.2618, lng: 127.7165, approx: true,
       loc: '浦添市牧港4-9-1（北谷の美浜店も宿から近い）', q: 'A&W 牧港店', link: 'https://tabelog.com/okinawa/A4703/A470404/47000030/',
       note: '沖縄のファストフードの定番。6:00〜翌2:00、ドライブインもある。ルートビアはおかわり自由。' },
     { name: 'ジャッキー ステーキハウス', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2140, lng: 127.6730, approx: true,
@@ -1099,7 +1117,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     });
   }
   buildFilterRow('area', Object.keys(AREAS).map(function (k) { return [k, AREAS[k].label]; }));
-  buildFilterRow('pri', Object.keys(PRI).map(function (k) { return [k, '優先度 ' + PRI[k]]; }));
+  buildFilterRow('pri', Object.keys(PRI).map(function (k) { return [k, PRI[k]]; }));
   var usedCats = Object.keys(CATS).filter(function (k) { return k !== 'food' && SPOTS.some(function (s) { return s.cat === k; }); });
   buildFilterRow('cat', usedCats.map(function (k) { return [k, CATS[k]]; }).concat([['rain', '雨でもOK']]));
 
@@ -1171,7 +1189,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         '<span class="num">' + s.no + '</span></div>' +
       '<div class="card-body">' +
         '<div class="card-top">' +
-          '<span class="pri ' + s.pri + '">優先度 ' + PRI[s.pri] + '</span>' +
+          '<span class="pri ' + s.pri + '">' + PRI[s.pri] + '</span>' +
           '<span class="area">' + AREAS[s.area].label + '</span>' +
           (s.kind === 'sight' ? '<span class="cat">' + CATS[s.cat] + '</span>' : '') +
           (s.rain ? '<span class="rain">雨OK</span>' : '') +
@@ -1200,7 +1218,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       if (!items.length) return;
       var h = document.createElement('div');
       h.className = 'group-h ' + p;
-      h.innerHTML = '優先度 ' + PRI[p] + ' <span class="mono">' + items.length + '</span>';
+      h.innerHTML = PRI[p] + ' <span class="mono">' + items.length + '</span>';
       listEl.appendChild(h);
       var wrap = document.createElement('div');
       wrap.style.cssText = 'display:grid;gap:10px;margin-bottom:8px';
@@ -1264,7 +1282,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
 
     SPOTS.forEach(function (s) {
       var m = L.marker([s.lat, s.lng], { icon: pinIcon(s, false), riseOnHover: true, title: s.name });
-      m.bindPopup('<b>' + s.no + '. ' + esc(s.name) + '</b><br>優先度 ' + PRI[s.pri] + '・' + AREAS[s.area].label +
+      m.bindPopup('<b>' + s.no + '. ' + esc(s.name) + '</b><br>' + PRI[s.pri] + '・' + AREAS[s.area].label +
         '<br><a href="' + gmSearch(s.q) + '" target="_blank" rel="noopener">Googleマップで見る ↗</a>');
       m.on('click', function () { select(s.id, 'map'); });
       markers[s.id] = m;
@@ -1317,7 +1335,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     var kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>沖縄・石垣旅行 2026</name>\n' +
       vis.map(function (s) {
         return '<Placemark><name>' + x(s.no + '. ' + s.name) + '</name><description>' +
-          x('優先度 ' + PRI[s.pri] + ' / ' + AREAS[s.area].label + ' / ' + CATS[s.cat] + ' — ' + s.note) +
+          x(PRI[s.pri] + ' / ' + AREAS[s.area].label + ' / ' + CATS[s.cat] + ' — ' + s.note) +
           '</description><Point><coordinates>' + s.lng + ',' + s.lat + ',0</coordinates></Point></Placemark>';
       }).join('\n') + '\n</Document></kml>';
     var url = URL.createObjectURL(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }));
@@ -1368,138 +1386,119 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     yonehara:  ['米原のヤエヤマヤシ群落', 24.4500, 124.1920, '米原のヤエヤマヤシ群落', 'ishi'],
     tamatori:  ['玉取崎展望台', 24.4995, 124.2820, '玉取崎展望台', 'ishi'],
     hirakubo:  ['平久保崎灯台', 24.6066, 124.3168, '平久保埼灯台', 'ishi'],
+    kouri:     ['古宇利大橋・古宇利島', 26.6960, 128.0240, '古宇利大橋', 'north'],
+    fukugi:    ['備瀬のフクギ並木', 26.7014, 127.8803, '備瀬のフクギ並木', 'north'],
+    hamahiga:  ['浜比嘉島', 26.3285, 127.9550, '浜比嘉島', 'central'],
+    kahou:     ['果報バンタ', 26.3630, 127.9790, '果報バンタ', 'central'],
+    ryutan:    ['龍潭', 26.2185, 127.7175, '龍潭 首里', 'south'],
+    shuriden:  ['首里殿内（昼食）', 26.2130, 127.7170, '首里殿内', 'south'],
     shiraho:   ['白保の海', 24.3640, 124.2470, '白保海岸', 'ishi']
   };
 
-  // 本島の3日間（A・B共通）
-  var HONTO = [
-    { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '中部（勝連城跡・海中道路・やちむんの里・北谷の夕日）',
-      why: '首里城が休園の日。晴れを活かして景色のいい中部を回ります。宿に一度荷物を置いてから北谷へ出ると夜が楽です。',
+  // 22日（晴れ）：2案
+  var D22_SOUTH = { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '沖縄ワールドをゆっくり、早めに宿へ',
+    why: '初日は朝が早いので、行き先は沖縄ワールドだけにして時間に追われないように。玉泉洞を歩くだけで約30分、園内全体は2時間半〜3時間半が目安なので、昼食込みで3時間取ります。15時台に宿へ入ってひと休み。',
+    stops: [
+      { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
+      { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（早めの昼食）' },
+      { move: '車で約30分' },
+      { t: '11:15', p: 'okiworld', l: '沖縄ワールド（玉泉洞・王国村・エイサーのショー）', tag: '屋内', sub: '園内で軽食もとれる。ショーの時刻は入口で確認' },
+      { move: '14:15ごろ出発、車で約50分' },
+      { t: '15:15', p: 'purari', l: 'Purari チェックイン・ひと休み', fixed: 1, sub: '予約メモは18:00。宿の案内では15:00から受付' },
+      { t: '17:15', p: 'amevi', l: '余裕があれば アメリカンビレッジで夕日（17:38ごろ）', open: 1 },
+      { t: '18:15', p: 'aw', l: '夕食：A&W（美浜店・宿から約20分）' }
+    ] };
+
+  var D22_EAST = { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '東海岸の島めぐり（勝連城跡・海中道路・果報バンタ）',
+    why: '宿から近い東側の島々を海中道路でつなぐドライブ。勝連城跡に加えて、断崖から青い海を見下ろす果報バンタをメインに。果報バンタは光の加減で午後がきれいです。運転は短め。',
+    stops: [
+      { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
+      { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（軽めの昼食）' },
+      { move: '高速経由で約1時間' },
+      { t: '12:00', p: 'katsuren', l: '勝連城跡（城壁の上から海を一望）' },
+      { t: '13:15', p: 'ayahashi', l: '海中道路をドライブ' },
+      { t: '13:45', p: 'hamahiga', l: '浜比嘉島（小さな集落と海辺を散歩）' },
+      { t: '15:00', p: 'kahou', l: '果報バンタ（宮城島・ぬちまーす敷地内の展望台）' },
+      { move: '車で約40分' },
+      { t: '17:00', p: 'purari', l: 'Purari チェックイン', fixed: 1, sub: '予約メモは18:00。宿の案内では15:00から受付' },
+      { t: '18:00', p: 'aw', l: '夕食：A&W（美浜店・宿から約20分）' }
+    ] };
+
+  var D23 = { date: '11/23', w: '月祝・本島', wx: 'sun', wxl: '晴れ', title: '首里城と金城町石畳道をじっくり、夕方は北谷',
+    why: '有料区域が開く12:00までは、城の外にある石畳道を歩いて昼食。午後は首里城に3時間ほど取ります。帰りに北谷で夕日。公開初日なので駐車場の混雑は覚悟しておきます。',
+    stops: [
+      { t: '09:30', p: 'purari', l: '宿を出発（約35分）' },
+      { t: '10:15', p: 'ishidatami', l: '金城町石畳道を散歩（坂が急なので歩きやすい靴で）', sub: '無料区域は11:15から、有料区域は12:00から開く' },
+      { t: '11:30', p: 'shuriden', l: '昼食：首里殿内（石畳道沿い）' },
+      { t: '12:30', p: 'shuri', l: '首里城（守礼門〜奉神門〜正殿の外観・見学デッキ・世誇殿・東のアザナ）', sub: '正殿の中は予約制なので外観のみ' },
+      { t: '15:30', p: 'ryutan', l: '龍潭（城の北側の池）から首里城を見上げる' },
+      { move: '車で約30分' },
+      { t: '16:45', p: 'amevi', l: 'アメリカンビレッジ・ZHYVAGOでコーヒー。17:38ごろ夕日' },
+      { t: '18:15', p: 'beefys', l: '夕食：ビーフィーズ（海沿いのステーキ）' },
+      { t: '20:00', p: 'purari', l: '宿へ（約20分）' }
+    ] };
+
+  var D24 = { date: '11/24', w: '火・本島', wx: 'wet', wxl: '雨', title: '北部（美ら海をじっくり・大家）、帰りは天気で行き先を決める',
+    why: '美ら海は水族館だけで2〜3時間、イルカショー（オキちゃん劇場）まで見るなら半日が目安なので、3時間半取りました。昼は名護の古民家「大家」でアグー料理。帰りは、雨なら鍾乳洞（ケイブ沖縄）、晴れていればやちむんの里へ。',
+    stops: [
+      { t: '08:45', p: 'purari', l: '宿を出発（高速経由で約1時間20分）' },
+      { t: '10:10', p: 'churaumi', l: '美ら海水族館（館内をじっくり＋イルカショー）', tag: '屋内', sub: 'イルカショーは屋外の劇場。雨の強さ次第' },
+      { t: '13:40', p: 'ufuya', l: '昼食：百年古家 大家（昼のLOは15:30）', sub: '美ら海から約30分' },
+      { move: 'ここで天気を見て、どちらかへ' },
+      { t: '15:30', p: 'cave_oki', l: 'ケイブ沖縄（鍾乳洞）', branch: 'rain', sub: '大家から約40分。営業時間は要確認' },
+      { t: '15:30', p: 'yachimun', l: 'やちむんの里（工房のギャラリーを回る）', branch: 'sun', alt: 1, sub: '大家から約50分。工房は夕方に閉まるところが多いので早めに' },
+      { t: '17:15', p: 'purari', l: '宿へ（どちらからも約30〜40分）。翌朝7:00出発なので早めに休む' }
+    ] };
+
+  var ISHI = [
+    { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、午後は竹富島',
+      why: '雨が降り出す夜より前に竹富島を済ませます。島は半日あれば一通り回れます。夜は人気店「ひとし」（要予約）。',
       stops: [
-        { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
-        { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（軽めの昼食）' },
-        { move: '高速経由で約1時間' },
-        { t: '12:00', p: 'katsuren', l: '勝連城跡（城壁の上から海を一望）' },
-        { t: '13:00', p: 'ayahashi', l: '海中道路をドライブ（海の上を走る一本道）' },
-        { move: '車で約1時間' },
-        { t: '14:15', p: 'yachimun', l: 'やちむんの里（ギャラリーと登り窯を見て回る）' },
-        { move: '車で約40分' },
-        { t: '16:00', p: 'purari', l: 'Purari チェックイン・荷物を置く', fixed: 1, sub: '予約メモは18:00。宿の案内では15:00から受付' },
-        { t: '16:45', p: 'zhyvago', l: 'アメリカンビレッジを散歩、ZHYVAGOでコーヒー。17:38ごろ夕日' },
-        { t: '18:15', p: 'beefys', l: '夕食：ビーフィーズ（海沿いのステーキ）', sub: '代わりに A&W 美浜店で手軽に済ませても' },
-        { t: '20:00', p: 'purari', l: '宿へ（約20分）' }
+        { t: '07:00', p: 'purari', l: '宿を出発（朝の渋滞を見込んで早めに）' },
+        { t: '08:00', p: 'naha_ap', l: 'レンタカー返却 → 送迎バスで空港', fixed: 1 },
+        { t: '09:40', l: '那覇発 → 10:45 石垣着', fixed: 1 },
+        { t: '11:00', p: 'isg_ap', l: 'レンタカー受け取り', fixed: 1 },
+        { move: '石垣市街まで約30分' },
+        { t: '11:45', p: 'porto', l: 'ホテルに荷物を預けて、港の近くで昼食' },
+        { t: '12:45', p: 'port', l: '高速船で竹富島へ（約15分・15分おき）' },
+        { t: '13:00', p: 'taketomi', l: '竹富島をレンタサイクルや水牛車で回る' },
+        { t: '16:30', p: 'port', l: '石垣港へ戻る' },
+        { t: '17:00', p: 'porto', l: 'チェックイン', fixed: 1 },
+        { t: '18:30', p: 'hitoshi', l: '夕食：ひとし（海鮮居酒屋）', tag: '要予約' }
       ] },
-    { date: '11/23', w: '月祝・本島', wx: 'sun', wxl: '晴れ', title: '南部の自然と首里城、夜は国際通り',
-      why: '首里城の有料区域は12:00から。公開初日なので、混雑のピークを外して15時ごろに入ります。夜は那覇で島唄ライブ。',
+    { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '雨の日の市街めぐり（ほぼ徒歩圏）',
+      why: '博物館・市場・屋敷はホテルから歩ける範囲にまとまっています。午後に雨が弱まれば、車でやいま村やバンナ公園へ。',
       stops: [
-        { t: '08:50', p: 'purari', l: '宿を出発（約50分）' },
-        { t: '10:00', p: 'gangala', l: 'ガンガラーの谷 ガイドツアー', tag: '要予約', sub: '約80〜90分' },
-        { t: '11:40', p: 'okiworld', l: '沖縄ワールド・玉泉洞', tag: '屋内' },
-        { t: '13:00', p: 'domu', l: '昼食：土夢 ごはんカフェ（糸満・約20分）' },
-        { move: '車で約30分' },
-        { t: '14:45', p: 'shuri', l: '首里城（正殿は外観と見学デッキから）', sub: '公開初日で混雑の見込み。周辺の駐車場は早めに確保' },
-        { t: '16:15', p: 'ishidatami', l: '金城町石畳道を下って散歩（途中に首里殿内）' },
-        { move: '車で約15分' },
-        { t: '17:15', p: 'kokusai', l: '国際通りを散歩' },
-        { t: '18:30', p: 'paikaji', l: '夕食：ぱいかじ（19:30から民謡ライブ）', sub: 'とぅばらーま（国際通り・島唄ライブ）も同じエリア。運転する人はお酒なし' },
-        { t: '21:00', p: 'purari', l: '宿へ（約40分）' }
+        { t: '10:00', p: 'isg_cave', l: '石垣島鍾乳洞（車で約10分）', tag: '屋内', sub: '見学は約30分' },
+        { t: '11:00', p: 'museum', l: '八重山博物館', tag: '屋内' },
+        { t: '12:00', p: 'ichiba', l: '公設市場・ユーグレナモールで昼食と買い物', tag: '屋根あり' },
+        { t: '13:30', p: 'kuniyoshi', l: '宮良殿内と国吉家のガジュマル巨木', sub: '濡れたガジュマルの気根は雨の日のほうが迫力あり' },
+        { t: '14:45', p: 'yaimamura', l: '小雨なら 石垣やいま村（リスザル・古民家）', open: 1 },
+        { t: '16:30', p: 'banna', l: '雨が上がれば バンナ公園の展望台', open: 1 },
+        { t: '17:30', p: 'porto', l: 'ホテルへ' }
       ] },
-    { date: '11/24', w: '火・本島', wx: 'wet', wxl: '雨', title: '北部・屋内中心（美ら海・大家・ケイブ沖縄）',
-      why: '雨の日は屋内の水族館と鍾乳洞へ。昼は名護の古民家「大家」でアグー料理。雨が弱ければ今帰仁城跡にも寄れます。',
+    { date: '11/27', w: '金・石垣', wx: 'cloud', wxl: 'くもり', title: '川平湾と北部ドライブ',
+      why: '昼前後に川平湾に着くので、日が差せば一番きれいな色が見られます。北の平久保崎まで行くかは時間を見て決めます。',
       stops: [
-        { t: '09:00', p: 'purari', l: '宿を出発（高速経由で約1時間20分）' },
-        { t: '10:30', p: 'churaumi', l: '美ら海水族館', tag: '屋内', sub: '入館は17:30まで' },
-        { t: '12:45', p: 'bunkakan', l: '海洋文化館（同じ公園内）', tag: '屋内' },
-        { t: '13:30', p: 'nakijin', l: '雨が弱ければ 今帰仁城跡（約15分）', open: 1 },
+        { t: '11:00', p: 'porto', l: 'チェックアウト', fixed: 1 },
         { move: '車で約30分' },
-        { t: '14:30', p: 'ufuya', l: '昼食：百年古家 大家（昼のLOは15:30）' },
-        { move: '車で約40分' },
-        { t: '16:15', p: 'cave_oki', l: 'ケイブ沖縄', tag: '屋内', sub: '営業時間は要確認' },
-        { t: '17:30', p: 'purari', l: '宿へ（約25分）。翌朝7:00出発なので早めに休む' }
+        { t: '11:40', p: 'kabira', l: '川平湾（展望台・浜を散歩、海が穏やかならグラスボート）' },
+        { t: '12:45', p: 'kaboo', l: '昼食：石垣牛ケバブ Kaboo' },
+        { t: '13:30', p: 'yonehara', l: '米原のヤシ林を少し散策' },
+        { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
+        { t: '15:15', p: 'hirakubo', l: '時間があれば 平久保崎灯台（往復約1時間）', open: 1 },
+        { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発（19:10の可能性あり）', fixed: 1 }
       ] }
   ];
 
   var COURSES = {
     A: {
-      sum: '本島は晴れの22・23日に屋外、雨の24日に美ら海と鍾乳洞。首里城は公開初日の23日午後。石垣は雨の26日を避け、竹富島を25日の午後に前倒しします。26日は市街の屋内スポットを歩いて回る日です。',
-      days: HONTO.concat([
-        { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、午後は竹富島',
-          why: '雨が降り出す夜より前に竹富島を済ませます。島は半日あれば一通り回れます。夜は人気店「ひとし」（要予約）。',
-          stops: [
-            { t: '07:00', p: 'purari', l: '宿を出発（朝の渋滞を見込んで早めに）' },
-            { t: '08:00', p: 'naha_ap', l: 'レンタカー返却 → 送迎バスで空港', fixed: 1 },
-            { t: '09:40', l: '那覇発 → 10:45 石垣着', fixed: 1 },
-            { t: '11:00', p: 'isg_ap', l: 'レンタカー受け取り', fixed: 1 },
-            { move: '石垣市街まで約30分' },
-            { t: '11:45', p: 'porto', l: 'ホテルに荷物を預けて、港の近くで昼食' },
-            { t: '12:45', p: 'port', l: '高速船で竹富島へ（約15分・15分おき）' },
-            { t: '13:00', p: 'taketomi', l: '竹富島をレンタサイクルや水牛車で回る' },
-            { t: '16:30', p: 'port', l: '石垣港へ戻る' },
-            { t: '17:00', p: 'porto', l: 'チェックイン', fixed: 1 },
-            { t: '18:30', p: 'hitoshi', l: '夕食：ひとし（海鮮居酒屋）', tag: '要予約' }
-          ] },
-        { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '雨の日の市街めぐり（ほぼ徒歩圏）',
-          why: '博物館・市場・屋敷はホテルから歩ける範囲にまとまっています。午後に雨が弱まれば、車でやいま村やバンナ公園へ。',
-          stops: [
-            { t: '10:00', p: 'isg_cave', l: '石垣島鍾乳洞（車で約10分）', tag: '屋内', sub: '見学は約30分' },
-            { t: '11:00', p: 'museum', l: '八重山博物館', tag: '屋内' },
-            { t: '12:00', p: 'ichiba', l: '公設市場・ユーグレナモールで昼食と買い物', tag: '屋根あり' },
-            { t: '13:30', p: 'kuniyoshi', l: '宮良殿内と国吉家のガジュマル巨木', sub: '濡れたガジュマルの気根は雨の日のほうが迫力あり' },
-            { t: '14:45', p: 'yaimamura', l: '小雨なら 石垣やいま村（リスザル・古民家）', open: 1 },
-            { t: '16:30', p: 'banna', l: '雨が上がれば バンナ公園の展望台', open: 1 },
-            { t: '17:30', p: 'porto', l: 'ホテルへ' }
-          ] },
-        { date: '11/27', w: '金・石垣', wx: 'cloud', wxl: 'くもり', title: '川平湾と北部ドライブ',
-          why: '昼前後に川平湾に着くので、日が差せば一番きれいな色が見られます。北の平久保崎まで行くかは時間を見て決めます。',
-          stops: [
-            { t: '11:00', p: 'porto', l: 'チェックアウト', fixed: 1 },
-            { move: '車で約30分' },
-            { t: '11:40', p: 'kabira', l: '川平湾（展望台・浜を散歩、海が穏やかならグラスボート）' },
-            { t: '12:45', p: 'kaboo', l: '昼食：石垣牛ケバブ Kaboo' },
-            { t: '13:30', p: 'yonehara', l: '米原のヤシ林を少し散策' },
-            { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
-            { t: '15:15', p: 'hirakubo', l: '時間があれば 平久保崎灯台（往復約1時間）', open: 1 },
-            { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発（19:10の可能性あり）', fixed: 1 }
-          ] }
-      ])
+      sum: '22日は沖縄ワールドだけをゆっくり見て、15時台に宿へ。23日は首里城と石畳道をじっくり、雨の24日は美ら海を3時間半、帰りは雨なら鍾乳洞・晴れればやちむんの里。北部へ行くのは24日の1回だけです。石垣は雨の26日を避けて竹富島を25日の午後に。予約が要るのは25日夜の「ひとし」だけです。',
+      days: [D22_SOUTH, D23, D24].concat(ISHI)
     },
     B: {
-      sum: '本島はAと同じ。石垣は竹富島を当初どおり26日にする案です（雨の中になる可能性が高い）。25日は川平湾と北部、27日は市街の屋内スポットに回します。',
-      days: HONTO.concat([
-        { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、川平湾と北部ドライブ',
-          why: '空港から川平湾へ直行すると、昼前後のいい時間に着けます。',
-          stops: [
-            { t: '07:00', p: 'purari', l: '宿を出発' },
-            { t: '08:00', p: 'naha_ap', l: 'レンタカー返却 → 9:40 那覇発', fixed: 1 },
-            { t: '11:00', p: 'isg_ap', l: '石垣でレンタカー受け取り', fixed: 1 },
-            { move: '車で約40分' },
-            { t: '11:45', p: 'kabira', l: '川平湾' },
-            { t: '12:45', p: 'kaboo', l: '昼食：石垣牛ケバブ Kaboo' },
-            { t: '13:30', p: 'yonehara', l: '米原のヤシ林' },
-            { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
-            { t: '17:00', p: 'porto', l: 'チェックイン', fixed: 1 },
-            { t: '18:30', p: 'hitoshi', l: '夕食：ひとし', tag: '要予約' }
-          ] },
-        { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '竹富島（雨具必須）',
-          why: '雨だとレンタサイクルはつらいので、屋根のある水牛車を中心に。強風で船が欠航したら27日の午前に回します。',
-          stops: [
-            { t: '09:30', p: 'port', l: '高速船で竹富島へ' },
-            { t: '09:45', p: 'taketomi', l: '水牛車・集落散歩' },
-            { t: '14:00', p: 'port', l: '石垣港へ戻る' },
-            { t: '14:30', p: 'museum', l: '八重山博物館', tag: '屋内' },
-            { t: '15:30', p: 'ichiba', l: '公設市場・ユーグレナモール', tag: '屋根あり' }
-          ] },
-        { date: '11/27', w: '金・石垣', wx: 'cloud', wxl: 'くもり', title: '鍾乳洞・市街・白保',
-          why: '最終日は空港の近くでゆっくり。返却は17:30ごろが目安です。',
-          stops: [
-            { t: '11:00', p: 'porto', l: 'チェックアウト', fixed: 1 },
-            { t: '11:20', p: 'isg_cave', l: '石垣島鍾乳洞', tag: '屋内' },
-            { t: '12:30', p: 'kuniyoshi', l: '宮良殿内と国吉家のガジュマル巨木' },
-            { t: '14:00', p: 'banna', l: 'バンナ公園の展望台' },
-            { t: '15:30', p: 'shiraho', l: '白保の海と集落（空港から約10分）' },
-            { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発', fixed: 1 }
-          ] }
-      ])
+      sum: '22日を宿から近い東海岸の島めぐり（勝連城跡・海中道路・果報バンタ）にする案。予約が不要で運転も短めです。23日以降はAと同じです。',
+      days: [D22_EAST, D23, D24].concat(ISHI)
     }
   };
 
@@ -1515,7 +1514,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     var pts = [];
     var onIshi = day.w.indexOf('石垣') >= 0;
     day.stops.forEach(function (s) {
-      if (s.p && (P[s.p][4] === 'ishi') === onIshi && pts[pts.length - 1] !== s.p) pts.push(s.p);
+      if (s.p && !s.alt && (P[s.p][4] === 'ishi') === onIshi && pts[pts.length - 1] !== s.p) pts.push(s.p);
     });
     if (pts.length < 2) return gmSearch(P[pts[0]][3]);
     var q = function (k) { return encodeURIComponent(P[k][3]); };
@@ -1544,8 +1543,9 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         var cls = s.fixed ? 'fixed' : (s.open ? 'open' : '');
         var num = nums[j] ? '<span class="snum">' + nums[j] + '</span>' : '';
         var tag = s.tag ? '<span class="chip-s ' + (s.tag === '要予約' ? 'rsv' : 'in') + '">' + esc(s.tag) + '</span>' : '';
+        var br = s.branch ? '<span class="chip-s ' + (s.branch === 'sun' ? 'sunc' : 'in') + '">' + (s.branch === 'sun' ? '晴れなら' : '雨なら') + '</span> ' : '';
         var sub = s.sub ? '<small>' + esc(s.sub) + '</small>' : '';
-        return '<li class="' + cls + '"><span class="t">' + esc(s.t || '') + '</span><span class="rail"></span><span class="what">' + num + esc(s.l) + tag + sub + '</span></li>';
+        return '<li class="' + cls + '"><span class="t">' + esc(s.t || '') + '</span><span class="rail"></span><span class="what">' + br + num + esc(s.l) + tag + sub + '</span></li>';
       }).join('');
       el.innerHTML =
         '<div class="cday-h"><span class="d">' + d.date + '</span><span class="w">' + esc(d.w) + '</span><span class="wx ' + d.wx + '">' + d.wxl + '</span></div>' +
@@ -1593,18 +1593,22 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     if (!cmap) return;
     cLayer.clearLayers();
     var nums = stopNums(d);
-    var line = [];
+    var line = [], alts = [];
     var color = cssVar(d.w.indexOf('石垣') >= 0 ? '--a-ishi' : '--tile');
     var onIshi = d.w.indexOf('石垣') >= 0;
     d.stops.forEach(function (s, j) {
       if (!s.p) return;
       var pt = P[s.p];
       if ((pt[4] === 'ishi') !== onIshi) return;   // 移動日は到着した島の分だけ地図に出す
-      line.push([pt[1], pt[2]]);
+      if (s.alt) alts.push({ at: line.length, ll: [pt[1], pt[2]] }); else line.push([pt[1], pt[2]]);
       L.marker([pt[1], pt[2]], {
-        icon: L.divIcon({ className: 'pin', html: '<span style="--c:' + color + '">' + nums[j] + '</span>', iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -12] }),
+        icon: L.divIcon({ className: 'pin', html: '<span style="--c:' + (s.alt ? cssVar('--sun') : color) + '">' + nums[j] + '</span>', iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -12] }),
         zIndexOffset: 100 - nums[j]
       }).addTo(cLayer).bindPopup('<b>' + nums[j] + '. ' + esc(pt[0]) + '</b><br>' + esc((s.t ? s.t + ' ' : '') + s.l));
+    });
+    alts.forEach(function (a) {
+      var seg = [line[a.at - 1], a.ll, line[a.at]].filter(Boolean);
+      if (seg.length > 1) L.polyline(seg, { color: cssVar('--sun'), weight: 3, opacity: .9, dashArray: '2 7' }).addTo(cLayer);
     });
     if (line.length > 1) {
       L.polyline(line, { color: color, weight: 3, opacity: .8, dashArray: '6 6' }).addTo(cLayer);
