@@ -344,7 +344,7 @@ td.nowrap { white-space: nowrap; }
 .leaflet-container { font-family: var(--font-body); }
 
 /* ---------- モデルコース（左：内容／右：ルート地図） ---------- */
-#panel-course { max-width: 1400px; margin: 0 auto; }
+#panel-shiori { max-width: 1400px; margin: 0 auto; }
 .course-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
 .course-left {
   min-width: 0; display: grid; gap: 36px;
@@ -392,6 +392,16 @@ td.nowrap { white-space: nowrap; }
   .course-days .cday { grid-template-columns: 1fr; }
 }
 
+/* ---------- Claude用メモ ---------- */
+.memo-howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.memo-howto div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; font-size: .88rem; min-width: 0; }
+.memo-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.memo-tools button { border: none; background: var(--fg); color: var(--bg); border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer; }
+.memo-tools span { font-size: .85rem; }
+.memo-text {
+  width: 100%; min-height: 50vh; resize: vertical; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--fg); padding: 12px 14px; font-family: var(--font-mono); font-size: .8rem; line-height: 1.6;
+}
 footer.credit { font-size: .76rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
 footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
 
@@ -423,160 +433,35 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       <span class="dates">2026.11.22（日）– 11.27（金）／ 5泊6日</span>
     </div>
     <nav class="tabs" role="tablist" aria-label="ページ切り替え">
-      <button class="tab" role="tab" id="tab-shiori" data-tab="shiori" aria-controls="panel-shiori">たびのしおり<span class="wip">WIP</span></button>
-      <button class="tab" role="tab" id="tab-course" data-tab="course" aria-controls="panel-course">モデルコース</button>
+      <button class="tab" role="tab" id="tab-shiori" data-tab="shiori" aria-controls="panel-shiori">たびのしおり</button>
       <button class="tab" role="tab" id="tab-booking" data-tab="booking" aria-controls="panel-booking">予約一覧</button>
       <button class="tab" role="tab" id="tab-spots-honto" data-tab="spots-honto" aria-controls="panel-spots">スポット（本島）</button>
       <button class="tab" role="tab" id="tab-spots-ishi" data-tab="spots-ishi" aria-controls="panel-spots">スポット（石垣）</button>
-      <button class="tab" role="tab" id="tab-notes" data-tab="notes" aria-controls="panel-notes">注意事項<span class="badge" title="要確認の件数">3</span></button>
+      <button class="tab" role="tab" id="tab-notes" data-tab="notes" aria-controls="panel-notes">注意事項<span class="badge" title="要確認の件数">4</span></button>
+      <button class="tab" role="tab" id="tab-memo" data-tab="memo" aria-controls="panel-memo">Claude用メモ</button>
     </nav>
   </div>
 </header>
 
-<!-- ================= たびのしおり ================= -->
+<!-- ================= たびのしおり（旅程＋ルート地図） ================= -->
 <main id="panel-shiori" role="tabpanel" aria-labelledby="tab-shiori" hidden>
-<div class="panel-wrap">
-  <div class="wip-note"><b>作成中</b><span>確定しているのは飛行機・宿・レンタカーのみ。点線の枠は「これから決める時間」です。行き先はモデルコースを見ながら決めていきます。</span></div>
-
-  <section>
-    <h2 class="sec">旅の基本</h2>
-    <div class="quick">
-      <div><span class="k">本島の宿（3泊）</span><span class="v">Purari</span><span class="s">沖縄市比屋根7-20-1</span></div>
-      <div><span class="k">石垣の宿（2泊）</span><span class="v">The Breakfast Hotel Porto 石垣島</span><span class="s">石垣市登野城（離島ターミナルまで徒歩7分ほど）</span></div>
-      <div><span class="k">移動手段</span><span class="v">レンタカー（トヨタ）</span><span class="s">本島・石垣とも借りっぱなし</span></div>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="sec">タイムスケジュール <small>天気は11/21時点の予報</small></h2>
-    <div class="days">
-
-      <article class="day">
-        <div class="day-side"><span class="dn">DAY 1</span><span class="d">11/22</span><span class="w">日曜</span><span class="isl">本島</span></div>
-        <div class="day-main">
-          <div class="day-title">沖縄本島へ <span class="wx sun">晴れ <span class="mono">23/17℃</span></span></div>
-          <ul class="tl">
-            <li class="fixed"><span class="t">06:30</span><span class="rail"></span><span class="what">羽田空港 出発（スカイマーク SKY 511）<small>早朝便。始発で間に合うか要確認</small></span></li>
-            <li class="fixed"><span class="t">09:30</span><span class="rail"></span><span class="what">那覇空港 到着</span></li>
-            <li class="fixed"><span class="t">09:30</span><span class="rail"></span><span class="what">レンタカー受け取り<small>空港の送迎バス乗り場（11-A）からトヨタレンタカー那覇空港店へ約5分</small></span></li>
-            <li class="open"><span class="t">10:30</span><span class="rail"></span><span class="what">未定<small>首里城はこの日終日休園</small></span></li>
-            <li class="fixed"><span class="t">18:00</span><span class="rail"></span><span class="what">Purari チェックイン</span></li>
-            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
-          </ul>
-          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
-        </div>
-      </article>
-
-      <article class="day">
-        <div class="day-side"><span class="dn">DAY 2</span><span class="d">11/23</span><span class="w">月・祝</span><span class="isl">本島</span></div>
-        <div class="day-main">
-          <div class="day-title">本島で終日 <span class="wx sun">晴れ時々くもり <span class="mono">25/18℃</span></span></div>
-          <ul class="tl">
-            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>首里城の有料区域は12:00まで閉鎖（正殿公開のセレモニー）</small></span></li>
-            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
-            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
-          </ul>
-          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
-        </div>
-      </article>
-
-      <article class="day">
-        <div class="day-side"><span class="dn">DAY 3</span><span class="d">11/24</span><span class="w">火曜</span><span class="isl">本島</span></div>
-        <div class="day-main">
-          <div class="day-title">本島で終日 <span class="wx wet">雨・午後は風強め <span class="mono">25/20℃</span></span></div>
-          <ul class="tl">
-            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>雨予報。屋内の行き先がおすすめ</small></span></li>
-            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
-            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定<small>翌朝7:00出発なので早めに休む</small></span></li>
-          </ul>
-          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
-        </div>
-      </article>
-
-      <article class="day ishi">
-        <div class="day-side"><span class="dn">DAY 4</span><span class="d">11/25</span><span class="w">水曜</span><span class="isl">本島→石垣</span></div>
-        <div class="day-main">
-          <div class="day-title">石垣島へ移動 <span class="wx cloud">くもり・夜に雨 <span class="mono">23/19℃</span></span></div>
-          <ul class="tl">
-            <li class="fixed"><span class="t">07:00</span><span class="rail"></span><span class="what">Purari チェックアウト・出発<small>朝の渋滞を見込んで早めに出る</small></span></li>
-            <li class="fixed"><span class="t">08:00</span><span class="rail"></span><span class="what">レンタカー返却（那覇空港店・8:00開店）<small>返却は9:00までならいつでも可</small></span></li>
-            <li class="move"><span class="t">08:15</span><span class="rail"></span><span class="what">送迎バスで空港へ（約5分）</span></li>
-            <li class="fixed"><span class="t">09:40</span><span class="rail"></span><span class="what">那覇空港 出発（JTA 605）</span></li>
-            <li class="fixed"><span class="t">10:45</span><span class="rail"></span><span class="what">石垣空港 到着</span></li>
-            <li class="fixed"><span class="t">11:00</span><span class="rail"></span><span class="what">レンタカー受け取り（石垣島空港店）</span></li>
-            <li class="open"><span class="t">昼〜</span><span class="rail"></span><span class="what">未定<small>竹富島の候補日（天気次第で前倒し）</small></span></li>
-            <li class="fixed"><span class="t">15:00</span><span class="rail"></span><span class="what">Porto 石垣島 チェックイン可</span></li>
-            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
-          </ul>
-          <div class="day-foot"><span>泊：Porto 石垣島</span><span>車：あり</span></div>
-        </div>
-      </article>
-
-      <article class="day ishi">
-        <div class="day-side"><span class="dn">DAY 5</span><span class="d">11/26</span><span class="w">木曜</span><span class="isl">石垣</span></div>
-        <div class="day-main">
-          <div class="day-title">石垣で終日 <span class="wx wet">雨 <span class="mono">24/20℃</span></span></div>
-          <ul class="tl">
-            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>竹富島の候補日（ただし雨予報）</small></span></li>
-            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
-            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
-          </ul>
-          <div class="day-foot"><span>泊：Porto 石垣島</span><span>車：あり</span></div>
-        </div>
-      </article>
-
-      <article class="day ishi">
-        <div class="day-side"><span class="dn">DAY 6</span><span class="d">11/27</span><span class="w">金曜</span><span class="isl">石垣→東京</span></div>
-        <div class="day-main">
-          <div class="day-title">帰る日 <span class="wx cloud">くもり <span class="mono">26/21℃</span></span></div>
-          <ul class="tl">
-            <li class="fixed"><span class="t">11:00</span><span class="rail"></span><span class="what">Porto チェックアウト</span></li>
-            <li class="open"><span class="t">昼〜夕</span><span class="rail"></span><span class="what">未定</span></li>
-            <li class="fixed"><span class="t">17:30</span><span class="rail"></span><span class="what">レンタカー返却（石垣島空港店）<small>返却は19:00までならいつでも可。搭乗に間に合うよう早めに</small></span></li>
-            <li class="fixed"><span class="t">19:20</span><span class="rail"></span><span class="what">石垣空港 出発（JAL 974）<small>ネットでは19:10発の情報もあり。予約画面で確認</small></span></li>
-            <li class="fixed"><span class="t">22:00</span><span class="rail"></span><span class="what">羽田空港 到着</span></li>
-          </ul>
-        </div>
-      </article>
-
-    </div>
-  </section>
-</div>
-</main>
-
-<!-- ================= モデルコース ================= -->
-<main id="panel-course" role="tabpanel" aria-labelledby="tab-course" hidden>
   <div class="course-layout">
     <div class="course-left">
 
       <section>
-        <h2 class="sec">天気予報 <small>11/21 15時ごろの発表を3社分</small></h2>
-        <p class="lead">3社とも同じ傾向です。<b>22日・23日の本島は晴れ</b>、<b>24日の本島は雨（午後は風も強い）</b>、<b>26日の石垣は雨</b>。25日・27日の石垣はくもりで、25日は夜から崩れる見込みです。</p>
-        <div class="table-scroll"><table class="wx-table">
-          <thead><tr><th>日付</th><th>場所</th><th>まとめ</th><th>tenki.jp</th><th>Yahoo!天気</th><th>ウェザーニュース</th></tr></thead>
-          <tbody>
-            <tr><td class="mono">11/22（日）</td><td>那覇</td><td class="sum"><span class="wx sun">晴れ</span></td><td>晴 23/17℃ 20%</td><td>晴 23/17℃ 10%<span class="sub">20日発表</span></td><td>22/17℃ 20%</td></tr>
-            <tr><td class="mono">11/23（月）</td><td>那覇</td><td class="sum"><span class="wx sun">晴れ時々くもり</span></td><td>曇時々晴 25/18℃ 30%</td><td>晴時々曇 25/18℃ 20%</td><td>24/18℃ 30%</td></tr>
-            <tr><td class="mono">11/24（火）</td><td>那覇</td><td class="sum"><span class="wx wet">雨</span></td><td>曇一時雨 25/22℃ 90%<span class="sub">午前に雨、午後は風10m/s</span></td><td>曇一時雨 25/19℃ 80%</td><td>24/20℃ 60%</td></tr>
-            <tr class="sep"><td class="mono">11/25（水）</td><td>那覇（朝）</td><td class="sum"><span class="wx cloud">くもり</span></td><td>曇 22/18℃ 30%</td><td>曇 22/17℃ 20%</td><td>22/19℃ 40%</td></tr>
-            <tr><td class="mono">11/25（水）</td><td>石垣</td><td class="sum"><span class="wx cloud">くもり・夜に雨</span></td><td>曇一時雨 23/19℃ 70%<span class="sub">雨は18時以降</span></td><td>曇 23/19℃ 40%</td><td>23/18℃ 40%</td></tr>
-            <tr><td class="mono">11/26（木）</td><td>石垣</td><td class="sum"><span class="wx wet">雨</span></td><td>雨のち曇 24/20℃ 70%<span class="sub">夕方まで雨</span></td><td>雨時々曇 25/21℃ 80%</td><td>24/20℃ 60%</td></tr>
-            <tr><td class="mono">11/27（金）</td><td>石垣</td><td class="sum"><span class="wx cloud">くもり</span></td><td>曇 25/21℃ 40%</td><td>曇一時雨 26/22℃ 50%</td><td>26/21℃ 40%</td></tr>
-          </tbody>
-        </table></div>
-        <p class="wx-note">数字は「最高/最低気温・降水確率」。5日以上先の予報は外れることもあるので、前日に見直します。
-          出典：<a href="https://tenki.jp/forecast/10/50/9110/47201/10days.html" target="_blank" rel="noopener">tenki.jp 那覇</a>・<a href="https://tenki.jp/forecast/10/50/9410/47207/10days.html" target="_blank" rel="noopener">石垣</a>／<a href="https://weather.yahoo.co.jp/weather/jp/47/9110/47201.html" target="_blank" rel="noopener">Yahoo!天気 那覇</a>・<a href="https://weather.yahoo.co.jp/weather/jp/47/9410/47207.html" target="_blank" rel="noopener">石垣</a>／<a href="https://weathernews.jp/onebox/tenki/okinawa/47201/week.html" target="_blank" rel="noopener">ウェザーニュース 那覇</a>・<a href="https://weathernews.jp/onebox/tenki/okinawa/47207/week.html" target="_blank" rel="noopener">石垣</a></p>
+        <h2 class="sec">旅の基本</h2>
+        <div class="quick">
+          <div><span class="k">本島の宿（3泊）</span><span class="v">Purari</span><span class="s">沖縄市比屋根7-20-1</span></div>
+          <div><span class="k">石垣の宿（2泊）</span><span class="v">The Breakfast Hotel Porto 石垣島</span><span class="s">石垣市登野城（離島ターミナルまで徒歩7分ほど）</span></div>
+          <div><span class="k">移動手段</span><span class="v">レンタカー（トヨタ）</span><span class="s">本島・石垣とも借りっぱなし</span></div>
+        </div>
       </section>
 
       <section>
-        <h2 class="sec">モデルコース <small>日をクリックすると地図にルートが出ます</small></h2>
-        <div class="course-switch" role="group" aria-label="コースを選ぶ">
-          <button type="button" id="course-btn-A" data-course="A" aria-pressed="true"><span class="course-tag">おすすめ</span> A. 初日は沖縄ワールドだけ（ゆったり）</button>
-          <button type="button" id="course-btn-B" data-course="B" aria-pressed="false"><span class="course-tag alt">別案</span> B. 初日は東海岸の島めぐり</button>
-        </div>
+        <h2 class="sec">タイムスケジュール <small>日をタップすると地図にその日のルートが出ます</small></h2>
         <p class="course-sum" id="course-sum"></p>
         <div id="course-days" class="course-days"></div>
-        <p class="wx-note">時刻は目安。移動時間は渋滞のない場合のおおよその値です。地図の線はスポットを順に直線で結んだもので、実際の道順は「Googleマップでルートを開く」で確認できます。</p>
+        <p class="wx-note">時刻は目安。移動時間は渋滞のない場合のおおよその値です。天気マークは11/21時点の予報。地図の線はスポットを順に直線で結んだもので、実際の道順は「Googleマップでルートを開く」で確認できます。</p>
       </section>
 
       <section>
@@ -584,14 +469,14 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         <div class="swap">
           <div><b style="color:var(--a-north)">本島北部</b><ul><li>美ら海水族館</li><li>海洋文化館</li><li>海中展望塔（海の中は雨でも見られる）</li></ul></div>
           <div><b style="color:var(--a-central)">本島中部</b><ul><li>ケイブ沖縄</li><li>アメリカンビレッジ（屋内の店が多い）</li><li>やちむんの里（工房の中）</li></ul></div>
-          <div><b style="color:var(--a-south)">那覇・南部</b><ul><li>沖縄ワールド・玉泉洞</li><li>ガンガラーの谷（小雨なら開催）</li></ul></div>
-          <div><b style="color:var(--a-ishi)">石垣</b><ul><li>石垣島鍾乳洞</li><li>八重山博物館</li><li>公設市場・ユーグレナモール（アーケード）</li><li>市街の歴史散歩（国吉家のガジュマル・宮良殿内）</li><li>米原のヤシ林（小雨ならむしろ雰囲気が出る）</li></ul></div>
+          <div><b style="color:var(--a-south)">那覇・南部</b><ul><li>沖縄ワールド・玉泉洞</li></ul></div>
+          <div><b style="color:var(--a-ishi)">石垣</b><ul><li>石垣島鍾乳洞</li><li>八重山博物館</li><li>公設市場・ユーグレナモール（アーケード）</li><li>市街の歴史散歩（国吉家のガジュマル・宮良殿内）</li></ul></div>
         </div>
       </section>
     </div>
 
     <div class="course-map-pane">
-      <div id="course-map" aria-label="モデルコースのルート地図"></div>
+      <div id="course-map" aria-label="その日のルート地図"></div>
       <div class="course-map-head" id="course-map-head"></div>
     </div>
   </div>
@@ -674,6 +559,29 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
   </div>
 </main>
 
+<!-- ================= Claude用メモ ================= -->
+<main id="panel-memo" role="tabpanel" aria-labelledby="tab-memo" hidden>
+<div class="panel-wrap">
+  <section>
+    <h2 class="sec">Claudeに相談するとき用のメモ</h2>
+    <p class="lead">旅行中にスマホのClaude（チャット）へ質問するとき、下の文章を最初に貼り付けると、これまで決めた前提（日程・宿・方針・候補）を踏まえて答えてもらえます。文章は、たびのしおりとスポット一覧から自動で作っているので、ページを更新すれば中身も最新になります。</p>
+    <div class="memo-howto">
+      <div><b>1. コピーして貼る（いちばん確実）</b><span>「メモをコピー」を押し、Claudeの新しいチャットに貼り付けてから、続けて質問を書く。</span></div>
+      <div><b>2. プロジェクトに入れておく</b><span>claude.ai で「プロジェクト」を作り、このメモを指示（またはナレッジ）に貼っておくと、そのプロジェクト内のチャットでは毎回貼らなくて済む。</span></div>
+      <div><b>質問のコツ</b><span>「今日は24日、いま美ら海を出たところ、外は小雨」のように、日付・現在地・天気・残り時間を添えると具体的に答えてもらいやすい。</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="memo-tools">
+      <button type="button" id="memo-copy">メモをコピー</button>
+      <span id="memo-status" class="muted" role="status"></span>
+    </div>
+    <textarea id="memo-text" class="memo-text" readonly rows="24" aria-label="Claudeに渡すメモ"></textarea>
+  </section>
+</div>
+</main>
+
 <!-- ================= 注意事項 ================= -->
 <main id="panel-notes" role="tabpanel" aria-labelledby="tab-notes" hidden>
 <div class="panel-wrap">
@@ -709,8 +617,15 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         </ul></div>
       <div class="note mid"><span class="lv">時間</span><b>11/27 夕方：返却 → 19:20発</b>
         <p>返却は19:00まで可能ですが、送迎と搭乗手続きを考えて17:30〜17:45ごろの返却が目安です。出発が19:10の場合も、これなら間に合います。</p></div>
-      <div class="note info"><span class="lv">時間</span><b>11/22 朝：羽田 6:30発</b>
-        <p>早朝便なので、始発で羽田に間に合うかを前日までに確認してください。</p></div>
+      <div class="note high"><span class="lv">要確認</span><b>11/22 朝：池袋の始発で 6:30発に間に合うか</b>
+        <ul>
+          <li>浜松町<b>4:59発のモノレール空港快速</b>に乗れば<b>羽田第1ターミナル5:15着</b>。池袋の山手線始発（4:25発）は浜松町4:55着で、乗り換え4分なので乗れるかは五分五分。乗れなければ5:11発で5:33着。</li>
+          <li><b>予定：池袋4:25発の山手線始発 → 浜松町で4:59発に乗れれば5:15着（締切まで約45分）、乗れなければ5:11発で5:33着（約27分）</b>。より確実にしたい場合は、池袋からタクシーで浜松町へ（4:20ごろ出発・6〜7千円ほど）。</li>
+          <li>スカイマークの羽田発は、2026年9月から<b>搭乗手続き・手荷物預けの締切が出発30分前（6:00）</b>、搭乗口は15分前（6:15）まで。搭乗口25〜29番（北側サテライト）は G 検査場から徒歩12〜15分。</li>
+          <li>5:33着だと締切まで約27分しかなく、手荷物預けの列・保安検査・搭乗口までの移動を全部収めるには<b>余裕がほとんどない</b>。22日は三連休の中日で、早朝便は混みやすい。</li>
+                    <li>いずれの場合も：スカイマークはWebチェックインがないので、着いたら<b>自動チェックイン機でメールのQRコードを読ませて紙の搭乗券を発券</b>（スマホのQRだけでは検査場を通れない）→ 寄り道せず G 検査場へ。預け荷物はなしか最小に。羽田まで直接タクシーなら5:00ごろ着（羽田空港定額で約1.2万円＋高速代、2022年時点）。</li>
+        </ul>
+        <p class="src">参考：<a href="https://tabiris.com/archives/skymark-shimekiri/" target="_blank" rel="noopener">スカイマーク締切変更（tabiris）</a>・<a href="https://tetsudo-ch.com/13034518.html" target="_blank" rel="noopener">北側サテライト（鉄道チャンネル）</a>・<a href="https://www.uber.com/ja-JP/blog/tokyo-airport-flat-fare-december-2022" target="_blank" rel="noopener">羽田空港定額運賃（Uber）</a></p></div>
     </div>
   </section>
 
@@ -719,9 +634,9 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     <div class="notes">
       <div class="note mid"><span class="lv">まとめ</span><b>予約が必要なのは「ひとし」だけ</b>
         <ul>
-          <li>モデルコースで予約が必要なのは、25日夜の「ひとし」（石垣の居酒屋）だけ。ほかはすべて予約なしで入れる。</li>
+          <li>しおりの予定で予約が必要なのは、25日夜の「ひとし」（石垣の居酒屋）だけ。ほかはすべて予約なしで入れる。</li>
           <li>ほかに予約が要るのは、首里城の正殿の中（今回は見ない）、ガンガラーの谷（コースから外した）、宮良川のカヌー・星空・西表島などのツアー（入れていない）。</li>
-          <li>予約しておくと安心：ビーフィーズ（23日夜）、民謡ライブのある店（ぱいかじ・とぅばらーま）。</li>
+          <li>ジャッキーステーキハウス（23日夕方）は予約なしで行く前提なので、混む前の早めの時間に。民謡ライブのある店（ぱいかじ・とぅばらーま）に行くなら予約しておくと安心。</li>
         </ul></div>
       <div class="note high"><span class="lv">首里城</span><b>11/22は終日休園、11/23は有料区域が12:00から</b>
         <ul>
@@ -764,7 +679,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     <h2 class="sec">天気・混雑</h2>
     <div class="notes">
       <div class="note mid"><span class="lv">天気</span><b>24日（本島）と26日（石垣）は雨予報</b>
-        <p>24日は午前に雨、午後は風10m/sほど。26日の石垣は夕方まで雨。竹富島を26日にすると雨の中になる可能性が高いので、モデルコースAでは25日の午後に前倒ししています。</p></div>
+        <p>24日は午前に雨、午後は風10m/sほど。26日の石垣は夕方まで雨。竹富島を26日にすると雨の中になる可能性が高いので、しおりでは25日の午後に前倒ししています。</p></div>
       <div class="note info"><span class="lv">混雑</span><b>23日は祝日＋首里城正殿の公開初日</b>
         <p>首里城の周辺道路と駐車場は混むと考えておきます。</p></div>
     </div>
@@ -976,9 +891,9 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     { name: 'A&W（牧港店）', pri: 'must', area: 'central', cat: 'food', rain: true, lat: 26.2618, lng: 127.7165, approx: true,
       loc: '浦添市牧港4-9-1（北谷の美浜店も宿から近い）', q: 'A&W 牧港店', link: 'https://tabelog.com/okinawa/A4703/A470404/47000030/',
       note: '沖縄のファストフードの定番。6:00〜翌2:00、ドライブインもある。ルートビアはおかわり自由。' },
-    { name: 'ジャッキー ステーキハウス', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2140, lng: 127.6730, approx: true,
+    { name: 'ジャッキー ステーキハウス', pri: 'must', area: 'south', cat: 'food', rain: true, lat: 26.2140, lng: 127.6730, approx: true,
       loc: '那覇市西（旭橋の近く）', q: 'ジャッキーステーキハウス', link: 'https://steak.co.jp/',
-      note: '創業69年の老舗ステーキハウス。混むので早めの時間がおすすめ。' },
+      note: '創業69年の老舗ステーキハウス。混むので早めの時間がおすすめ。営業時間は11:00〜22:00（掲載により差あり）。水曜定休の情報もあり。23日（祝）の早めの夕食に。' },
     { name: 'ぱいかじ（国際通り店）', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2155, lng: 127.6820, approx: true,
       loc: '那覇市久茂地3-29-68 2階', q: '沖縄の台所 ぱいかじ 国際通り店', link: 'https://r.gnavi.co.jp/f293222/',
       note: '沖縄料理と毎晩の三線・民謡ライブ。17:00〜24:00。上之屋店は閉店しているので国際通り店へ。石垣の店ではない。' },
@@ -1044,8 +959,8 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
   function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
   /* ---------- タブ ---------- */
-  var PANELS = ['shiori', 'course', 'booking', 'spots', 'notes'];
-  var TABS = ['shiori', 'course', 'booking', 'spots-honto', 'spots-ishi', 'notes'];
+  var PANELS = ['shiori', 'booking', 'spots', 'notes', 'memo'];
+  var TABS = ['shiori', 'booking', 'spots-honto', 'spots-ishi', 'notes', 'memo'];
   var island = 'honto';   // スポットタブで表示中の島
   var mapReady = false;
   var HAS_L = typeof L !== 'undefined';   // 地図ライブラリが読めない（オフライン等）ときは一覧だけ表示
@@ -1058,6 +973,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
   }
   function showTab(name) {
     if (name === 'spots') name = 'spots-honto';
+    if (name === 'course') name = 'shiori';
     if (TABS.indexOf(name) < 0) name = 'shiori';
     var panel = name.indexOf('spots') === 0 ? 'spots' : name;
     PANELS.forEach(function (p) { document.getElementById('panel-' + p).hidden = p !== panel; });
@@ -1073,7 +989,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         setTimeout(function () { map.invalidateSize(); map.fitBounds(VIEWS[island]); }, 0);
       }
     }
-    if (name === 'course') {
+    if (panel === 'shiori') {
       measureHeader();
       initCourse();
       if (cmap) setTimeout(function () { cmap.invalidateSize(); selectDay(courseDay, false); }, 0);
@@ -1391,6 +1307,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     hamahiga:  ['浜比嘉島', 26.3285, 127.9550, '浜比嘉島', 'central'],
     kahou:     ['果報バンタ', 26.3630, 127.9790, '果報バンタ', 'central'],
     ryutan:    ['龍潭', 26.2185, 127.7175, '龍潭 首里', 'south'],
+    jackie:    ['ジャッキー ステーキハウス（夕食）', 26.2140, 127.6730, 'ジャッキーステーキハウス', 'south'],
     shuriden:  ['首里殿内（昼食）', 26.2130, 127.7170, '首里殿内', 'south'],
     shiraho:   ['白保の海', 24.3640, 124.2470, '白保海岸', 'ishi']
   };
@@ -1398,7 +1315,13 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
   // 22日（晴れ）：2案
   var D22_SOUTH = { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '沖縄ワールドをゆっくり、早めに宿へ',
     why: '初日は朝が早いので、行き先は沖縄ワールドだけにして時間に追われないように。玉泉洞を歩くだけで約30分、園内全体は2時間半〜3時間半が目安なので、昼食込みで3時間取ります。15時台に宿へ入ってひと休み。',
+    stay: 'Purari',
     stops: [
+      { t: '04:25', l: '池袋駅 出発（JR山手線 外回り・始発）', fixed: 1, sub: '浜松町4:55着。モノレールへの乗り換え口に近い車両に乗っておく' },
+      { t: '04:59', l: '浜松町 → 東京モノレール 空港快速（乗れれば）', fixed: 1, sub: '乗り換えは4分。乗れなければ次の5:11発（羽田5:33着）。どちらも「羽田空港第1ターミナル」駅で降りる' },
+      { t: '05:15', l: '羽田空港 第1ターミナル 到着（5:11発なら5:33着）→ 自動チェックイン機で紙の搭乗券を発券 → G検査場へ', fixed: 1, tag: '時間ギリギリ', sub: 'メールのQRコードを機械に読ませる（スマホのQRだけでは検査場を通れない）。6:00 搭乗手続き・手荷物預け締切／6:15 搭乗口締切。搭乗口25〜29番（北側サテライト）はG検査場から徒歩12〜15分' },
+      { t: '06:30', l: '羽田空港 出発（スカイマーク SKY 511）', fixed: 1 },
+      { t: '09:30', l: '那覇空港 到着 → 送迎バス（乗り場 11-A）でレンタカー店へ約5分', fixed: 1 },
       { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
       { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（早めの昼食）' },
       { move: '車で約30分' },
@@ -1409,36 +1332,23 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       { t: '18:15', p: 'aw', l: '夕食：A&W（美浜店・宿から約20分）' }
     ] };
 
-  var D22_EAST = { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '東海岸の島めぐり（勝連城跡・海中道路・果報バンタ）',
-    why: '宿から近い東側の島々を海中道路でつなぐドライブ。勝連城跡に加えて、断崖から青い海を見下ろす果報バンタをメインに。果報バンタは光の加減で午後がきれいです。運転は短め。',
-    stops: [
-      { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
-      { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（軽めの昼食）' },
-      { move: '高速経由で約1時間' },
-      { t: '12:00', p: 'katsuren', l: '勝連城跡（城壁の上から海を一望）' },
-      { t: '13:15', p: 'ayahashi', l: '海中道路をドライブ' },
-      { t: '13:45', p: 'hamahiga', l: '浜比嘉島（小さな集落と海辺を散歩）' },
-      { t: '15:00', p: 'kahou', l: '果報バンタ（宮城島・ぬちまーす敷地内の展望台）' },
-      { move: '車で約40分' },
-      { t: '17:00', p: 'purari', l: 'Purari チェックイン', fixed: 1, sub: '予約メモは18:00。宿の案内では15:00から受付' },
-      { t: '18:00', p: 'aw', l: '夕食：A&W（美浜店・宿から約20分）' }
-    ] };
-
   var D23 = { date: '11/23', w: '月祝・本島', wx: 'sun', wxl: '晴れ', title: '首里城と金城町石畳道をじっくり、夕方は北谷',
-    why: '有料区域が開く12:00までは、城の外にある石畳道を歩いて昼食。午後は首里城に3時間ほど取ります。帰りに北谷で夕日。公開初日なので駐車場の混雑は覚悟しておきます。',
+    stay: 'Purari',
+    why: '有料区域が開く12:00までは、城の外にある石畳道を歩いて昼食。午後は首里城に3時間ほど取ります。夕食は首里から近いジャッキーステーキハウスで、混み始める前の早めの時間に。公開初日なので駐車場の混雑は覚悟しておきます。',
     stops: [
       { t: '09:30', p: 'purari', l: '宿を出発（約35分）' },
       { t: '10:15', p: 'ishidatami', l: '金城町石畳道を散歩（坂が急なので歩きやすい靴で）', sub: '無料区域は11:15から、有料区域は12:00から開く' },
       { t: '11:30', p: 'shuriden', l: '昼食：首里殿内（石畳道沿い）' },
       { t: '12:30', p: 'shuri', l: '首里城（守礼門〜奉神門〜正殿の外観・見学デッキ・世誇殿・東のアザナ）', sub: '正殿の中は予約制なので外観のみ' },
       { t: '15:30', p: 'ryutan', l: '龍潭（城の北側の池）から首里城を見上げる' },
-      { move: '車で約30分' },
-      { t: '16:45', p: 'amevi', l: 'アメリカンビレッジ・ZHYVAGOでコーヒー。17:38ごろ夕日' },
-      { t: '18:15', p: 'beefys', l: '夕食：ビーフィーズ（海沿いのステーキ）' },
-      { t: '20:00', p: 'purari', l: '宿へ（約20分）' }
+      { move: '車で約20分' },
+      { t: '16:30', p: 'jackie', l: '夕食：ジャッキー ステーキハウス（那覇・旭橋の近く）', sub: '人気店なので混む前の早めの時間に。近くの有料駐車場を利用' },
+      { move: '車で約40分' },
+      { t: '18:30', p: 'purari', l: '宿へ。早めに休む' }
     ] };
 
   var D24 = { date: '11/24', w: '火・本島', wx: 'wet', wxl: '雨', title: '北部（美ら海をじっくり・大家）、帰りは天気で行き先を決める',
+    stay: 'Purari',
     why: '美ら海は水族館だけで2〜3時間、イルカショー（オキちゃん劇場）まで見るなら半日が目安なので、3時間半取りました。昼は名護の古民家「大家」でアグー料理。帰りは、雨なら鍾乳洞（ケイブ沖縄）、晴れていればやちむんの里へ。',
     stops: [
       { t: '08:45', p: 'purari', l: '宿を出発（高速経由で約1時間20分）' },
@@ -1452,6 +1362,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
 
   var ISHI = [
     { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、午後は竹富島',
+      stay: 'Porto 石垣島',
       why: '雨が降り出す夜より前に竹富島を済ませます。島は半日あれば一通り回れます。夜は人気店「ひとし」（要予約）。',
       stops: [
         { t: '07:00', p: 'purari', l: '宿を出発（朝の渋滞を見込んで早めに）' },
@@ -1467,6 +1378,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         { t: '18:30', p: 'hitoshi', l: '夕食：ひとし（海鮮居酒屋）', tag: '要予約' }
       ] },
     { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '雨の日の市街めぐり（ほぼ徒歩圏）',
+      stay: 'Porto 石垣島',
       why: '博物館・市場・屋敷はホテルから歩ける範囲にまとまっています。午後に雨が弱まれば、車でやいま村やバンナ公園へ。',
       stops: [
         { t: '10:00', p: 'isg_cave', l: '石垣島鍾乳洞（車で約10分）', tag: '屋内', sub: '見学は約30分' },
@@ -1487,18 +1399,18 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         { t: '13:30', p: 'yonehara', l: '米原のヤシ林を少し散策' },
         { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
         { t: '15:15', p: 'hirakubo', l: '時間があれば 平久保崎灯台（往復約1時間）', open: 1 },
-        { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発（19:10の可能性あり）', fixed: 1 }
+        { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 送迎で空港へ', fixed: 1 },
+        { t: '19:20', l: '石垣空港 出発（JAL 974）', fixed: 1, sub: 'ネットでは19:10発の情報もあり。予約画面で確認' },
+        { t: '22:00', l: '羽田空港 到着（荷物の受け取りに15〜20分）', fixed: 1 },
+        { t: '22:35', l: '京急で品川へ → JR山手線 外回り', sub: '乗換なしなら、第1ターミナル22:55発のリムジンバスで池袋駅西口23:30着（1,400円）' },
+        { t: '23:34', l: '池袋駅 到着', fixed: 1 }
       ] }
   ];
 
   var COURSES = {
     A: {
-      sum: '22日は沖縄ワールドだけをゆっくり見て、15時台に宿へ。23日は首里城と石畳道をじっくり、雨の24日は美ら海を3時間半、帰りは雨なら鍾乳洞・晴れればやちむんの里。北部へ行くのは24日の1回だけです。石垣は雨の26日を避けて竹富島を25日の午後に。予約が要るのは25日夜の「ひとし」だけです。',
+      sum: '本島3泊・石垣2泊。22日は沖縄ワールドだけにして15時台に宿へ。23日は首里城と石畳道をじっくり、雨の24日は美ら海を3時間半、帰りは雨なら鍾乳洞・晴れればやちむんの里。北部へ行くのは24日の1回だけです。石垣は雨の26日を避けて竹富島を25日の午後に。予約が要るのは25日夜の「ひとし」だけです。',
       days: [D22_SOUTH, D23, D24].concat(ISHI)
-    },
-    B: {
-      sum: '22日を宿から近い東海岸の島めぐり（勝連城跡・海中道路・果報バンタ）にする案。予約が不要で運転も短めです。23日以降はAと同じです。',
-      days: [D22_EAST, D23, D24].concat(ISHI)
     }
   };
 
@@ -1542,7 +1454,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         if (s.move) return '<li class="move"><span class="t"></span><span class="rail"></span><span class="what">' + esc(s.move) + '</span></li>';
         var cls = s.fixed ? 'fixed' : (s.open ? 'open' : '');
         var num = nums[j] ? '<span class="snum">' + nums[j] + '</span>' : '';
-        var tag = s.tag ? '<span class="chip-s ' + (s.tag === '要予約' ? 'rsv' : 'in') + '">' + esc(s.tag) + '</span>' : '';
+        var tag = s.tag ? '<span class="chip-s ' + (s.tag === '要予約' ? 'rsv' : s.tag === '時間ギリギリ' ? 'adj' : 'in') + '">' + esc(s.tag) + '</span>' : '';
         var br = s.branch ? '<span class="chip-s ' + (s.branch === 'sun' ? 'sunc' : 'in') + '">' + (s.branch === 'sun' ? '晴れなら' : '雨なら') + '</span> ' : '';
         var sub = s.sub ? '<small>' + esc(s.sub) + '</small>' : '';
         return '<li class="' + cls + '"><span class="t">' + esc(s.t || '') + '</span><span class="rail"></span><span class="what">' + br + num + esc(s.l) + tag + sub + '</span></li>';
@@ -1551,6 +1463,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         '<div class="cday-h"><span class="d">' + d.date + '</span><span class="w">' + esc(d.w) + '</span><span class="wx ' + d.wx + '">' + d.wxl + '</span></div>' +
         '<div class="cday-main"><div class="cday-title">' + esc(d.title) + '</div><ul class="tl">' + tl + '</ul>' +
         '<p class="cday-why">' + esc(d.why) + '</p>' +
+        (d.stay ? '<div class="day-foot"><span>泊：' + esc(d.stay) + '</span></div>' : '') +
         '<div class="card-links"><a href="' + gmRoute(d) + '" target="_blank" rel="noopener">Googleマップでルートを開く ↗</a></div></div>';
       el.addEventListener('click', function (ev) {
         if (ev.target.closest('a')) return;
@@ -1614,7 +1527,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       L.polyline(line, { color: color, weight: 3, opacity: .8, dashArray: '6 6' }).addTo(cLayer);
     }
     var head = document.getElementById('course-map-head');
-    head.innerHTML = '<b>' + courseKey + '・' + d.date + '</b> ' + esc(d.title);
+    head.innerHTML = '<b>' + d.date + '</b> ' + esc(d.title);
     if (line.length) cmap.flyToBounds(L.latLngBounds(line).pad(0.25), { duration: 0.6, maxZoom: 13 });
   }
 
@@ -1631,6 +1544,81 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     }, { rootMargin: '-45% 0px -50% 0px' });
     document.querySelectorAll('.cday').forEach(function (el) { dayObserver.observe(el); });
   }
+
+  /* ---------- Claude用メモ（しおりとスポットのデータから自動生成） ---------- */
+  function buildMemo() {
+    var out = [];
+    out.push('あなたは私たち夫婦の沖縄・石垣旅行（2026年11月22日〜27日、5泊6日）の相談役です。');
+    out.push('以下の前提を踏まえて、旅行中の質問に日本語で簡潔に答えてください。予定の変更を提案するときは、移動時間・営業時間・天気を考慮し、無理のない案にしてください。');
+    out.push('');
+    out.push('## 方針・好み');
+    out.push('- ゆとり重視。詰め込みすぎない（特に移動日や朝の早い日）。');
+    out.push('- 基本は予約なしで行ける場所。予約が要るのは25日夜の居酒屋「ひとし」だけ。');
+    out.push('- 同じ方面（特に本島北部）に何度も行くのは避けたい。');
+    out.push('- 岬など「見て終わり」の場所は優先度低め。');
+    out.push('- レンタカー移動。運転する人はお酒を飲まない。');
+    out.push('');
+    out.push('## 移動・宿（確定）');
+    out.push('- 出発・帰着は池袋駅。');
+    out.push('- 11/22 池袋4:25発の山手線始発 → 浜松町4:55着 → 4:59発のモノレール空港快速に乗れれば羽田第1ターミナル5:15着、乗れなければ5:11発で5:33着の予定。羽田では自動チェックイン機で紙の搭乗券を発券してからG検査場へ（スカイマークはWebチェックインなし）。スカイマーク羽田発は搭乗手続き・手荷物預けが出発30分前（6:00）締切、搭乗口は15分前まで。北側サテライト（25〜29番）はG検査場から徒歩12〜15分。');
+    out.push('- 11/22 羽田6:30発 → 那覇9:30着（スカイマーク SKY511）');
+    out.push('- 11/25 那覇9:40発 → 石垣10:45着（JTA605）');
+    out.push('- 11/27 石垣19:20発 → 羽田22:00着（JAL974。ネットでは19:10発/22:10着の情報もあり未確認）');
+    out.push('- 11/27 羽田から池袋へ：京急22:35発 → 品川 → 山手線で池袋23:34着。または第1ターミナル22:55発のリムジンバスで池袋駅西口23:30着。');
+    out.push('- 本島の宿：Purari（沖縄市比屋根7-20-1）11/22〜25の3泊。チェックアウト10:00。');
+    out.push('- 石垣の宿：The Breakfast Hotel Porto 石垣島（石垣市登野城、離島ターミナルまで徒歩7分ほど）11/25〜27の2泊。チェックイン15:00、チェックアウト11:00。');
+    out.push('- レンタカー：トヨタレンタカー。那覇空港店（11/22 9:30〜11/25 9:00までに返却、店は8:00開店、空港まで送迎バス約5分）、石垣島空港店（11/25 11:00〜11/27 19:00までに返却）。返却時刻は最遅なので早めに返してよい。');
+    out.push('');
+    out.push('## 予定（11/21時点。天気は予報）');
+    COURSES.A.days.forEach(function (d) {
+      out.push('### ' + d.date + '（' + d.w + '・' + d.wxl + '）' + d.title + (d.stay ? '　泊：' + d.stay : ''));
+      d.stops.forEach(function (s) {
+        if (s.move) { out.push('  - （' + s.move + '）'); return; }
+        var br = s.branch ? (s.branch === 'sun' ? '【晴れなら】' : '【雨なら】') : '';
+        out.push('  - ' + (s.t ? s.t + ' ' : '') + br + s.l + (s.tag ? '［' + s.tag + '］' : '') + (s.sub ? '（' + s.sub + '）' : ''));
+      });
+      out.push('  - ねらい：' + d.why);
+    });
+    out.push('');
+    out.push('## 注意事項');
+    out.push('- 首里城：11/22は終日休園。11/23は有料区域12:00から（正殿公開初日で混雑）。正殿の中は予約制なので外観と見学デッキのみの予定。入場料は大人1,000円。');
+    out.push('- 竹富島への船は強風で欠航することがある。行けなかったら26日の雨の合間か27日午前に回す。');
+    out.push('- 24日（本島）と26日（石垣）は雨予報。雨の差し替え先：美ら海水族館・海洋文化館・ケイブ沖縄・沖縄ワールド玉泉洞・石垣島鍾乳洞・八重山博物館・石垣の公設市場とユーグレナモール。');
+    out.push('');
+    ['honto', 'ishi'].forEach(function (isl) {
+      ['sight', 'food'].forEach(function (k) {
+        var items = SPOTS.filter(function (s) { return s.isl === isl && s.kind === k; });
+        if (!items.length) return;
+        out.push('## 候補リスト：' + (isl === 'ishi' ? '石垣・竹富' : '沖縄本島') + 'の' + (k === 'food' ? 'レストラン・カフェ' : '観光スポット') + '（優先度 高/中/低）');
+        ['must', 'want', 'low'].forEach(function (p) {
+          items.filter(function (s) { return s.pri === p; }).forEach(function (s) {
+            out.push('- [' + PRI[s.pri] + '] ' + s.name + '（' + AREAS[s.area].label + (k === 'sight' ? '・' + CATS[s.cat] : '') + (s.rain ? '・雨OK' : '') + (s.rsv ? '・要予約' : '') + '）' + s.loc + '。' + s.note);
+          });
+        });
+        out.push('');
+      });
+    });
+    return out.join('\n').trim();
+  }
+
+  (function () {
+    var ta = document.getElementById('memo-text');
+    var status = document.getElementById('memo-status');
+    ta.value = buildMemo();
+    document.getElementById('memo-copy').addEventListener('click', function () {
+      function fallback() {
+        ta.focus(); ta.select();
+        status.textContent = '選択しました。長押しまたは Ctrl+C でコピーしてください。';
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(function () {
+          status.textContent = 'コピーしました。Claudeのチャットに貼り付けてください。';
+        }, fallback);
+      } else {
+        fallback();
+      }
+    });
+  })();
 
   /* ---------- 起動 ---------- */
   render();
