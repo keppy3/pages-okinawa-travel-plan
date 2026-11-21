@@ -1,0 +1,1599 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>沖縄・石垣旅行 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Opti:wght@700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: 上部に固定ヘッダー＋5タブ。スポット以外は1カラム、スポットは 地図(左) | 一覧(右) の2ペイン */
+:root {
+  --bg: #f4f7f7;
+  --surface: #ffffff;
+  --fg: #142427;
+  --muted: #5a6d70;
+  --line: #d6e1e2;
+  --sea: #0f6f78;
+  --sea-soft: #e0f0f1;
+  --tile: #b8442e;
+  --tile-soft: #f8e7e2;
+  --warn: #9a5a00;
+  --warn-soft: #fdf1dc;
+  --rain: #3b6fb0;
+  --rain-soft: #e5edf8;
+  --sun: #b07a00;
+  --sun-soft: #fbf1d6;
+  --a-north: #3c7a47;   --a-north-soft: #e3f1e6;
+  --a-central: #0f6f78; --a-central-soft: #e0f0f1;
+  --a-south: #b8442e;   --a-south-soft: #f8e7e2;
+  --a-ishi: #3b6fb0;    --a-ishi-soft: #e5edf8;
+  --font-display: "Kaisei Opti", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Consolas", monospace;
+  --header-h: 108px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1719; --surface: #152225; --fg: #e3eced; --muted: #93a7aa; --line: #26383b;
+    --sea: #5cc3cc; --sea-soft: #173539; --tile: #f08a72; --tile-soft: #3a211b;
+    --warn: #f3b860; --warn-soft: #33270f; --rain: #8db6ec; --rain-soft: #1b2b40; --sun: #f0c45c; --sun-soft: #352a10;
+    --a-north: #8fd19e; --a-north-soft: #1c3322;
+    --a-central: #5cc3cc; --a-central-soft: #173539;
+    --a-south: #f08a72; --a-south-soft: #3a211b;
+    --a-ishi: #8db6ec; --a-ishi-soft: #1b2b40;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1719; --surface: #152225; --fg: #e3eced; --muted: #93a7aa; --line: #26383b;
+  --sea: #5cc3cc; --sea-soft: #173539; --tile: #f08a72; --tile-soft: #3a211b;
+  --warn: #f3b860; --warn-soft: #33270f; --rain: #8db6ec; --rain-soft: #1b2b40; --sun: #f0c45c; --sun-soft: #352a10;
+  --a-north: #8fd19e; --a-north-soft: #1c3322;
+  --a-central: #5cc3cc; --a-central-soft: #173539;
+  --a-south: #f08a72; --a-south-soft: #3a211b;
+  --a-ishi: #8db6ec; --a-ishi-soft: #1b2b40;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.7;
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+a { color: var(--sea); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--sea); outline-offset: 2px; }
+
+/* ---------- Header & tabs ---------- */
+.app-header {
+  position: sticky; top: 0; z-index: 1000;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1400px; margin: 0 auto;
+  padding-block: 14px 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 10px;
+}
+.title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.title-row h1 { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: .02em; }
+.title-row .dates { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  border: none; background: none; cursor: pointer; white-space: nowrap;
+  padding: 8px 12px 10px; font-size: .93rem; font-weight: 500; color: var(--muted);
+  border-bottom: 3px solid transparent;
+}
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--tile); font-weight: 700; }
+.tab .wip { font-size: .66rem; font-weight: 700; letter-spacing: .06em; color: var(--warn); border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 4px; vertical-align: 2px; }
+.tab .badge { font-family: var(--font-mono); font-size: .68rem; background: var(--tile); color: #fff; border-radius: 8px; padding: 0 6px; margin-left: 4px; vertical-align: 1px; }
+
+.panel-wrap {
+  max-width: 920px; margin: 0 auto;
+  padding-block: 28px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 40px;
+}
+.panel-wrap > * { min-width: 0; }
+h2.sec {
+  font-family: var(--font-display); font-size: 1.3rem; letter-spacing: .02em;
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 14px;
+}
+h2.sec small { font-family: var(--font-body); font-size: .8rem; color: var(--muted); font-weight: 500; }
+.lead { margin: 0 0 14px; font-size: .92rem; color: var(--muted); max-width: 68ch; }
+
+/* ---------- しおり ---------- */
+.wip-note {
+  display: flex; gap: 10px; align-items: flex-start; font-size: .88rem;
+  background: var(--warn-soft); border-radius: 10px; padding: 12px 14px;
+}
+.wip-note b { color: var(--warn); white-space: nowrap; }
+.quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.quick div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.quick .k { font-size: .72rem; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+.quick .v { font-weight: 700; }
+.quick .s { font-size: .82rem; color: var(--muted); }
+
+.days { display: grid; gap: 12px; }
+.day {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  display: grid; grid-template-columns: 96px 1fr; overflow: hidden;
+}
+.day-side {
+  background: var(--sea-soft); color: var(--sea);
+  padding: 16px 12px; display: grid; align-content: start; gap: 2px; text-align: center;
+}
+.day.ishi .day-side { background: var(--a-ishi-soft); color: var(--a-ishi); }
+.day-side .dn { font-size: .72rem; letter-spacing: .12em; font-weight: 700; }
+.day-side .d { font-family: var(--font-mono); font-size: 1.5rem; line-height: 1.2; }
+.day-side .w { font-size: .82rem; font-weight: 700; }
+.day-side .isl { margin-top: 8px; font-size: .74rem; font-weight: 700; }
+.day-main { padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.day-title { font-weight: 700; font-size: 1.02rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 4.4em 14px 1fr; gap: 0 10px; font-size: .92rem; }
+.tl .t { font-family: var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; padding-block: 4px; text-align: right; }
+.tl .rail { position: relative; }
+.tl .rail::before { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+.tl li:first-child .rail::before { top: 12px; }
+.tl li:last-child .rail::before { bottom: calc(100% - 12px); }
+.tl .rail::after { content: ""; position: absolute; left: 2px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--sea); }
+.tl li.fixed .rail::after { background: var(--sea); }
+.tl li.move .rail::after { width: 6px; height: 6px; left: 4px; top: 11px; border-color: var(--muted); }
+.tl li.move .what { color: var(--muted); font-size: .84rem; }
+.tl li.open .rail::after { border-style: dashed; border-color: var(--muted); }
+.tl li.open .what { color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; padding: 2px 8px; margin-block: 3px; }
+.tl .what { padding-block: 4px; min-width: 0; }
+.tl .what small { display: block; color: var(--muted); font-size: .8rem; }
+.chip-s { font-size: .68rem; font-weight: 700; padding: 0 6px; border-radius: 3px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+.chip-s.adj { background: var(--tile-soft); color: var(--tile); }
+.chip-s.cand { background: var(--a-ishi-soft); color: var(--a-ishi); }
+.chip-s.rsv { background: var(--warn-soft); color: var(--warn); }
+.chip-s.in { background: var(--rain-soft); color: var(--rain); }
+.day-foot { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; border-top: 1px solid var(--line); padding-top: 8px; }
+
+/* 天気チップ */
+.wx { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.wx.sun { background: var(--sun-soft); color: var(--sun); }
+.wx.cloud { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.wx.wet { background: var(--rain-soft); color: var(--rain); }
+.wx .mono { font-weight: 500; }
+
+/* ---------- モデルコース ---------- */
+.wx-table td, .wx-table th { white-space: nowrap; }
+.wx-table td.sum { font-weight: 700; }
+.wx-table tr.sep td { border-top: 2px solid var(--line); }
+.wx-note { font-size: .82rem; color: var(--muted); margin-top: 8px; }
+details.course { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+details.course + details.course { margin-top: 14px; }
+details.course > summary {
+  list-style: none; cursor: pointer; padding: 16px 18px; display: grid; gap: 4px;
+  border-bottom: 1px solid transparent;
+}
+details.course[open] > summary { border-bottom-color: var(--line); }
+details.course > summary::-webkit-details-marker { display: none; }
+.course-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.course-head h3 { font-family: var(--font-display); font-size: 1.15rem; }
+.course-tag { font-size: .7rem; font-weight: 700; letter-spacing: .06em; padding: 1px 8px; border-radius: 3px; background: var(--tile); color: #fff; }
+.course-tag.alt { background: none; color: var(--muted); border: 1px solid var(--line); }
+.course-sum { font-size: .88rem; color: var(--muted); margin: 0; max-width: 70ch; }
+.course-toggle { font-size: .78rem; color: var(--sea); font-weight: 700; }
+details[open] .course-toggle::after { content: "（閉じる）"; }
+details:not([open]) .course-toggle::after { content: "（開く）"; }
+.course-body { padding: 14px 18px 18px; display: grid; gap: 12px; }
+.cday { display: grid; grid-template-columns: 88px 1fr; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.cday:last-child { border-bottom: none; padding-bottom: 0; }
+.cday-h { display: grid; align-content: start; gap: 4px; }
+.cday-h .d { font-family: var(--font-mono); font-size: 1.1rem; }
+.cday-h .w { font-size: .78rem; color: var(--muted); }
+.cday-main { display: grid; gap: 6px; min-width: 0; }
+.cday-title { font-weight: 700; }
+.cday-why { font-size: .84rem; color: var(--muted); margin: 0; }
+.swap { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.swap div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.swap b { display: block; font-size: .85rem; margin-bottom: 4px; }
+.swap ul { margin: 0; padding-left: 1.1em; font-size: .86rem; }
+
+/* ---------- 注意事項 ---------- */
+.notes { display: grid; gap: 10px; }
+.note {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 12px;
+}
+.note .lv { font-size: .7rem; font-weight: 700; letter-spacing: .06em; border: 1px solid currentColor; border-radius: 4px; padding: 0 6px; height: fit-content; margin-top: 3px; white-space: nowrap; }
+.note.high .lv { color: var(--tile); }
+.note.mid .lv { color: var(--warn); }
+.note.info .lv { color: var(--sea); }
+.note.done .lv { color: var(--muted); }
+.note.high { border-color: color-mix(in srgb, var(--tile) 40%, var(--line)); }
+.note b { display: block; }
+.note p, .note ul { margin: 0; grid-column: 2; font-size: .9rem; min-width: 0; }
+.note ul { padding-left: 1.1em; }
+.note .src { font-size: .78rem; color: var(--muted); }
+
+/* ---------- 予約一覧 ---------- */
+.table-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 640px; }
+th, td { text-align: left; padding: 10px 12px; vertical-align: top; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: none; }
+th { font-size: .74rem; letter-spacing: .06em; color: var(--muted); font-weight: 700; background: var(--bg); }
+td .sub { display: block; font-size: .8rem; color: var(--muted); }
+td .sub.flag, .flag { color: var(--tile); font-weight: 700; }
+td.nowrap { white-space: nowrap; }
+.inline-link { border: none; background: none; padding: 0; color: var(--sea); text-decoration: underline; cursor: pointer; }
+
+/* ---------- 観光スポット ---------- */
+#panel-spots { max-width: 1400px; margin: 0 auto; }
+.spots-layout {
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
+}
+.map-pane { position: relative; border-right: 1px solid var(--line); min-width: 0; }
+#map { position: absolute; inset: 0; background: var(--line); }
+.map-tools {
+  position: absolute; z-index: 500; top: 12px; right: 12px;
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+}
+.map-tools button {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 4px 12px; font-size: .82rem; font-weight: 500; cursor: pointer;
+  box-shadow: 0 1px 4px rgb(0 0 0 / .12);
+}
+.map-tools button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.map-legend {
+  position: absolute; z-index: 500; left: 12px; bottom: 24px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 10px; font-size: .74rem; display: grid; gap: 3px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / .12);
+}
+.map-legend span { display: flex; align-items: center; gap: 6px; }
+.map-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.map-legend i.base { border-radius: 2px; background: var(--fg); }
+
+.list-pane { overflow-y: auto; min-width: 0; padding: 14px 16px 60px; padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; align-content: start; gap: 12px; }
+.filters { display: grid; gap: 6px; }
+.frow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.frow .fl { font-size: .72rem; color: var(--muted); font-weight: 700; letter-spacing: .06em; width: 4.2em; }
+.fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 11px; font-size: .8rem; cursor: pointer; }
+.fchip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.list-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; color: var(--muted); }
+.list-tools button { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: .8rem; }
+
+.group-h { font-size: .8rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: baseline; }
+.group-h.must { color: var(--tile); }
+.card {
+  display: grid; grid-template-columns: 112px 1fr; gap: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  text-align: left; width: 100%; padding: 0;
+}
+.card:hover { border-color: color-mix(in srgb, var(--fg) 30%, var(--line)); }
+.card.is-active { border-color: var(--c); box-shadow: 0 0 0 2px var(--c), 0 6px 18px rgb(0 0 0 / .10); }
+.thumb { position: relative; background: var(--c-soft); min-height: 112px; }
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .ph {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  font-size: .72rem; font-weight: 700; color: var(--c); padding: 6px;
+  background: repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--c) 10%, transparent) 8px 9px);
+}
+.thumb .num {
+  position: absolute; left: 6px; top: 6px; min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: var(--c); color: #fff; font-family: var(--font-mono); font-size: .74rem;
+  display: grid; place-items: center; box-shadow: 0 0 0 2px rgb(255 255 255 / .85);
+}
+.card-body { padding: 10px 12px; display: grid; gap: 5px; align-content: start; min-width: 0; }
+.card-top { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pri { font-size: .68rem; font-weight: 700; letter-spacing: .04em; padding: 1px 7px; border-radius: 3px; white-space: nowrap; }
+.pri.must { background: var(--tile); color: #fff; }
+.pri.want { border: 1px solid var(--fg); color: var(--fg); }
+.pri.low { border: 1px solid var(--line); color: var(--muted); }
+.area { font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 3px; background: var(--c-soft); color: var(--c); white-space: nowrap; }
+.cat { font-size: .72rem; color: var(--muted); white-space: nowrap; }
+.rain { font-size: .68rem; color: var(--rain); border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; white-space: nowrap; }
+.rsv { font-size: .68rem; color: var(--warn); border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; white-space: nowrap; }
+.card-name { font-weight: 700; font-size: 1rem; line-height: 1.4; }
+.card-loc { font-size: .78rem; color: var(--muted); }
+.card-note { font-size: .84rem; margin: 0; }
+.card-links { display: flex; gap: 12px; flex-wrap: wrap; font-size: .8rem; }
+.card-links a { text-decoration: none; font-weight: 500; }
+.card-links a:hover { text-decoration: underline; }
+.empty { font-size: .9rem; color: var(--muted); padding: 24px 0; text-align: center; }
+
+/* Leaflet pins */
+.pin { background: none; border: none; }
+.pin span {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--c); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .35);
+  transition: transform .15s;
+}
+.pin.must span { width: 32px; height: 32px; font-size: 12px; box-shadow: 0 0 0 3px var(--c), 0 1px 6px rgb(0 0 0 / .4); }
+.pin.is-active span { transform: scale(1.35); box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--c), 0 4px 12px rgb(0 0 0 / .4); }
+.pin.is-active { z-index: 2000 !important; }
+.base-pin span {
+  display: grid; place-items: center; width: 24px; height: 24px; border-radius: 5px;
+  background: #1f2d30; color: #fff; font-size: 11px; font-weight: 700; border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / .35);
+}
+.leaflet-popup-content { font-family: var(--font-body); font-size: 13px; line-height: 1.5; margin: 10px 12px; }
+.leaflet-popup-content b { font-size: 14px; }
+.leaflet-container { font-family: var(--font-body); }
+
+/* ---------- モデルコース（左：内容／右：ルート地図） ---------- */
+#panel-course { max-width: 1400px; margin: 0 auto; }
+.course-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
+.course-left {
+  min-width: 0; display: grid; gap: 36px;
+  padding-block: 24px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 20px;
+}
+.course-left > * { min-width: 0; }
+.course-map-pane {
+  position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
+  border-left: 1px solid var(--line); min-width: 0;
+}
+#course-map { position: absolute; inset: 0; background: var(--line); }
+.course-map-head {
+  position: absolute; z-index: 500; left: 56px; right: 12px; top: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px;
+  font-size: .85rem; box-shadow: 0 1px 4px rgb(0 0 0 / .12);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.course-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.course-switch button {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px;
+  cursor: pointer; font-size: .9rem; font-weight: 700; text-align: left; display: flex; align-items: center; gap: 8px;
+}
+.course-switch button[aria-pressed="true"] { border-color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+.course-days { display: grid; gap: 12px; margin-top: 12px; }
+.course-days .cday {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  grid-template-columns: 84px 1fr; cursor: pointer; transition: border-color .15s, box-shadow .15s;
+}
+.course-days .cday:last-child { border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.course-days .cday.is-active { border-color: var(--tile); box-shadow: 0 0 0 2px var(--tile); }
+.course-days .cday.ishi.is-active { border-color: var(--a-ishi); box-shadow: 0 0 0 2px var(--a-ishi); }
+.snum {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; margin-right: 6px;
+  border-radius: 9px; background: var(--tile); color: #fff; font-family: var(--font-mono); font-size: .68rem; vertical-align: 1px;
+}
+.cday.ishi .snum { background: var(--a-ishi); }
+
+@media (max-width: 860px) {
+  .course-layout { grid-template-columns: 1fr; }
+  .course-map-pane { order: -1; position: sticky; top: var(--header-h); z-index: 400; height: 38vh; border-left: none; border-bottom: 1px solid var(--line); }
+  .course-left { padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+@media (max-width: 520px) {
+  .course-days .cday { grid-template-columns: 1fr; }
+}
+
+footer.credit { font-size: .76rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
+
+@media (max-width: 860px) {
+  .spots-layout { grid-template-columns: 1fr; height: auto; }
+  .map-pane { position: sticky; top: var(--header-h); z-index: 400; height: 42vh; border-right: none; border-bottom: 1px solid var(--line); }
+  .list-pane { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  .map-legend { display: none; }
+}
+@media (max-width: 520px) {
+  .day { grid-template-columns: 1fr; }
+  .day-side { grid-auto-flow: column; justify-content: start; align-items: baseline; gap: 10px; text-align: left; padding: 10px 14px; }
+  .day-side .isl { margin-top: 0; }
+  .card { grid-template-columns: 92px 1fr; }
+  .thumb { min-height: 100px; }
+  .tl li { grid-template-columns: 3.9em 14px 1fr; }
+  .cday { grid-template-columns: 1fr; gap: 6px; }
+  .cday-h { grid-auto-flow: column; justify-content: start; align-items: baseline; gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="title-row">
+      <h1>沖縄・石垣旅行</h1>
+      <span class="dates">2026.11.22（日）– 11.27（金）／ 5泊6日</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="ページ切り替え">
+      <button class="tab" role="tab" id="tab-shiori" data-tab="shiori" aria-controls="panel-shiori">たびのしおり<span class="wip">WIP</span></button>
+      <button class="tab" role="tab" id="tab-course" data-tab="course" aria-controls="panel-course">モデルコース</button>
+      <button class="tab" role="tab" id="tab-booking" data-tab="booking" aria-controls="panel-booking">予約一覧</button>
+      <button class="tab" role="tab" id="tab-spots-honto" data-tab="spots-honto" aria-controls="panel-spots">スポット（本島）</button>
+      <button class="tab" role="tab" id="tab-spots-ishi" data-tab="spots-ishi" aria-controls="panel-spots">スポット（石垣）</button>
+      <button class="tab" role="tab" id="tab-notes" data-tab="notes" aria-controls="panel-notes">注意事項<span class="badge" title="要確認の件数">3</span></button>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= たびのしおり ================= -->
+<main id="panel-shiori" role="tabpanel" aria-labelledby="tab-shiori" hidden>
+<div class="panel-wrap">
+  <div class="wip-note"><b>作成中</b><span>確定しているのは飛行機・宿・レンタカーのみ。点線の枠は「これから決める時間」です。行き先はモデルコースを見ながら決めていきます。</span></div>
+
+  <section>
+    <h2 class="sec">旅の基本</h2>
+    <div class="quick">
+      <div><span class="k">本島の宿（3泊）</span><span class="v">Purari</span><span class="s">沖縄市比屋根7-20-1</span></div>
+      <div><span class="k">石垣の宿（2泊）</span><span class="v">The Breakfast Hotel Porto 石垣島</span><span class="s">石垣市登野城（離島ターミナルまで徒歩7分ほど）</span></div>
+      <div><span class="k">移動手段</span><span class="v">レンタカー（トヨタ）</span><span class="s">本島・石垣とも借りっぱなし</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">タイムスケジュール <small>天気は11/21時点の予報</small></h2>
+    <div class="days">
+
+      <article class="day">
+        <div class="day-side"><span class="dn">DAY 1</span><span class="d">11/22</span><span class="w">日曜</span><span class="isl">本島</span></div>
+        <div class="day-main">
+          <div class="day-title">沖縄本島へ <span class="wx sun">晴れ <span class="mono">23/17℃</span></span></div>
+          <ul class="tl">
+            <li class="fixed"><span class="t">06:30</span><span class="rail"></span><span class="what">羽田空港 出発（スカイマーク SKY 511）<small>早朝便。始発で間に合うか要確認</small></span></li>
+            <li class="fixed"><span class="t">09:30</span><span class="rail"></span><span class="what">那覇空港 到着</span></li>
+            <li class="fixed"><span class="t">09:30</span><span class="rail"></span><span class="what">レンタカー受け取り<small>空港の送迎バス乗り場（11-A）からトヨタレンタカー那覇空港店へ約5分</small></span></li>
+            <li class="open"><span class="t">10:30</span><span class="rail"></span><span class="what">未定<small>首里城はこの日終日休園</small></span></li>
+            <li class="fixed"><span class="t">18:00</span><span class="rail"></span><span class="what">Purari チェックイン</span></li>
+            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
+          </ul>
+          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
+        </div>
+      </article>
+
+      <article class="day">
+        <div class="day-side"><span class="dn">DAY 2</span><span class="d">11/23</span><span class="w">月・祝</span><span class="isl">本島</span></div>
+        <div class="day-main">
+          <div class="day-title">本島で終日 <span class="wx sun">晴れ時々くもり <span class="mono">25/18℃</span></span></div>
+          <ul class="tl">
+            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>首里城の有料区域は12:00まで閉鎖（正殿公開のセレモニー）</small></span></li>
+            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
+            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
+          </ul>
+          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
+        </div>
+      </article>
+
+      <article class="day">
+        <div class="day-side"><span class="dn">DAY 3</span><span class="d">11/24</span><span class="w">火曜</span><span class="isl">本島</span></div>
+        <div class="day-main">
+          <div class="day-title">本島で終日 <span class="wx wet">雨・午後は風強め <span class="mono">25/20℃</span></span></div>
+          <ul class="tl">
+            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>雨予報。屋内の行き先がおすすめ</small></span></li>
+            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
+            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定<small>翌朝7:00出発なので早めに休む</small></span></li>
+          </ul>
+          <div class="day-foot"><span>泊：Purari</span><span>車：あり</span></div>
+        </div>
+      </article>
+
+      <article class="day ishi">
+        <div class="day-side"><span class="dn">DAY 4</span><span class="d">11/25</span><span class="w">水曜</span><span class="isl">本島→石垣</span></div>
+        <div class="day-main">
+          <div class="day-title">石垣島へ移動 <span class="wx cloud">くもり・夜に雨 <span class="mono">23/19℃</span></span></div>
+          <ul class="tl">
+            <li class="fixed"><span class="t">07:00</span><span class="rail"></span><span class="what">Purari チェックアウト・出発<small>朝の渋滞を見込んで早めに出る</small></span></li>
+            <li class="fixed"><span class="t">08:00</span><span class="rail"></span><span class="what">レンタカー返却（那覇空港店・8:00開店）<small>返却は9:00までならいつでも可</small></span></li>
+            <li class="move"><span class="t">08:15</span><span class="rail"></span><span class="what">送迎バスで空港へ（約5分）</span></li>
+            <li class="fixed"><span class="t">09:40</span><span class="rail"></span><span class="what">那覇空港 出発（JTA 605）</span></li>
+            <li class="fixed"><span class="t">10:45</span><span class="rail"></span><span class="what">石垣空港 到着</span></li>
+            <li class="fixed"><span class="t">11:00</span><span class="rail"></span><span class="what">レンタカー受け取り（石垣島空港店）</span></li>
+            <li class="open"><span class="t">昼〜</span><span class="rail"></span><span class="what">未定<small>竹富島の候補日（天気次第で前倒し）</small></span></li>
+            <li class="fixed"><span class="t">15:00</span><span class="rail"></span><span class="what">Porto 石垣島 チェックイン可</span></li>
+            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
+          </ul>
+          <div class="day-foot"><span>泊：Porto 石垣島</span><span>車：あり</span></div>
+        </div>
+      </article>
+
+      <article class="day ishi">
+        <div class="day-side"><span class="dn">DAY 5</span><span class="d">11/26</span><span class="w">木曜</span><span class="isl">石垣</span></div>
+        <div class="day-main">
+          <div class="day-title">石垣で終日 <span class="wx wet">雨 <span class="mono">24/20℃</span></span></div>
+          <ul class="tl">
+            <li class="open"><span class="t">午前</span><span class="rail"></span><span class="what">未定<small>竹富島の候補日（ただし雨予報）</small></span></li>
+            <li class="open"><span class="t">午後</span><span class="rail"></span><span class="what">未定</span></li>
+            <li class="open"><span class="t">夜</span><span class="rail"></span><span class="what">夕食：未定</span></li>
+          </ul>
+          <div class="day-foot"><span>泊：Porto 石垣島</span><span>車：あり</span></div>
+        </div>
+      </article>
+
+      <article class="day ishi">
+        <div class="day-side"><span class="dn">DAY 6</span><span class="d">11/27</span><span class="w">金曜</span><span class="isl">石垣→東京</span></div>
+        <div class="day-main">
+          <div class="day-title">帰る日 <span class="wx cloud">くもり <span class="mono">26/21℃</span></span></div>
+          <ul class="tl">
+            <li class="fixed"><span class="t">11:00</span><span class="rail"></span><span class="what">Porto チェックアウト</span></li>
+            <li class="open"><span class="t">昼〜夕</span><span class="rail"></span><span class="what">未定</span></li>
+            <li class="fixed"><span class="t">17:30</span><span class="rail"></span><span class="what">レンタカー返却（石垣島空港店）<small>返却は19:00までならいつでも可。搭乗に間に合うよう早めに</small></span></li>
+            <li class="fixed"><span class="t">19:20</span><span class="rail"></span><span class="what">石垣空港 出発（JAL 974）<small>ネットでは19:10発の情報もあり。予約画面で確認</small></span></li>
+            <li class="fixed"><span class="t">22:00</span><span class="rail"></span><span class="what">羽田空港 到着</span></li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </section>
+</div>
+</main>
+
+<!-- ================= モデルコース ================= -->
+<main id="panel-course" role="tabpanel" aria-labelledby="tab-course" hidden>
+  <div class="course-layout">
+    <div class="course-left">
+
+      <section>
+        <h2 class="sec">天気予報 <small>11/21 15時ごろの発表を3社分</small></h2>
+        <p class="lead">3社とも同じ傾向です。<b>22日・23日の本島は晴れ</b>、<b>24日の本島は雨（午後は風も強い）</b>、<b>26日の石垣は雨</b>。25日・27日の石垣はくもりで、25日は夜から崩れる見込みです。</p>
+        <div class="table-scroll"><table class="wx-table">
+          <thead><tr><th>日付</th><th>場所</th><th>まとめ</th><th>tenki.jp</th><th>Yahoo!天気</th><th>ウェザーニュース</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">11/22（日）</td><td>那覇</td><td class="sum"><span class="wx sun">晴れ</span></td><td>晴 23/17℃ 20%</td><td>晴 23/17℃ 10%<span class="sub">20日発表</span></td><td>22/17℃ 20%</td></tr>
+            <tr><td class="mono">11/23（月）</td><td>那覇</td><td class="sum"><span class="wx sun">晴れ時々くもり</span></td><td>曇時々晴 25/18℃ 30%</td><td>晴時々曇 25/18℃ 20%</td><td>24/18℃ 30%</td></tr>
+            <tr><td class="mono">11/24（火）</td><td>那覇</td><td class="sum"><span class="wx wet">雨</span></td><td>曇一時雨 25/22℃ 90%<span class="sub">午前に雨、午後は風10m/s</span></td><td>曇一時雨 25/19℃ 80%</td><td>24/20℃ 60%</td></tr>
+            <tr class="sep"><td class="mono">11/25（水）</td><td>那覇（朝）</td><td class="sum"><span class="wx cloud">くもり</span></td><td>曇 22/18℃ 30%</td><td>曇 22/17℃ 20%</td><td>22/19℃ 40%</td></tr>
+            <tr><td class="mono">11/25（水）</td><td>石垣</td><td class="sum"><span class="wx cloud">くもり・夜に雨</span></td><td>曇一時雨 23/19℃ 70%<span class="sub">雨は18時以降</span></td><td>曇 23/19℃ 40%</td><td>23/18℃ 40%</td></tr>
+            <tr><td class="mono">11/26（木）</td><td>石垣</td><td class="sum"><span class="wx wet">雨</span></td><td>雨のち曇 24/20℃ 70%<span class="sub">夕方まで雨</span></td><td>雨時々曇 25/21℃ 80%</td><td>24/20℃ 60%</td></tr>
+            <tr><td class="mono">11/27（金）</td><td>石垣</td><td class="sum"><span class="wx cloud">くもり</span></td><td>曇 25/21℃ 40%</td><td>曇一時雨 26/22℃ 50%</td><td>26/21℃ 40%</td></tr>
+          </tbody>
+        </table></div>
+        <p class="wx-note">数字は「最高/最低気温・降水確率」。5日以上先の予報は外れることもあるので、前日に見直します。
+          出典：<a href="https://tenki.jp/forecast/10/50/9110/47201/10days.html" target="_blank" rel="noopener">tenki.jp 那覇</a>・<a href="https://tenki.jp/forecast/10/50/9410/47207/10days.html" target="_blank" rel="noopener">石垣</a>／<a href="https://weather.yahoo.co.jp/weather/jp/47/9110/47201.html" target="_blank" rel="noopener">Yahoo!天気 那覇</a>・<a href="https://weather.yahoo.co.jp/weather/jp/47/9410/47207.html" target="_blank" rel="noopener">石垣</a>／<a href="https://weathernews.jp/onebox/tenki/okinawa/47201/week.html" target="_blank" rel="noopener">ウェザーニュース 那覇</a>・<a href="https://weathernews.jp/onebox/tenki/okinawa/47207/week.html" target="_blank" rel="noopener">石垣</a></p>
+      </section>
+
+      <section>
+        <h2 class="sec">モデルコース <small>日をクリックすると地図にルートが出ます</small></h2>
+        <div class="course-switch" role="group" aria-label="コースを選ぶ">
+          <button type="button" id="course-btn-A" data-course="A" aria-pressed="true"><span class="course-tag">おすすめ</span> A. 竹富島は25日の午後</button>
+          <button type="button" id="course-btn-B" data-course="B" aria-pressed="false"><span class="course-tag alt">別案</span> B. 竹富島は26日（当初どおり）</button>
+        </div>
+        <p class="course-sum" id="course-sum"></p>
+        <div id="course-days" class="course-days"></div>
+        <p class="wx-note">時刻は目安。移動時間は渋滞のない場合のおおよその値です。地図の線はスポットを順に直線で結んだもので、実際の道順は「Googleマップでルートを開く」で確認できます。</p>
+      </section>
+
+      <section>
+        <h2 class="sec">雨のときの差し替え先</h2>
+        <div class="swap">
+          <div><b style="color:var(--a-north)">本島北部</b><ul><li>美ら海水族館</li><li>海洋文化館</li><li>海中展望塔（海の中は雨でも見られる）</li></ul></div>
+          <div><b style="color:var(--a-central)">本島中部</b><ul><li>ケイブ沖縄</li><li>アメリカンビレッジ（屋内の店が多い）</li><li>やちむんの里（工房の中）</li></ul></div>
+          <div><b style="color:var(--a-south)">那覇・南部</b><ul><li>沖縄ワールド・玉泉洞</li><li>ガンガラーの谷（小雨なら開催）</li></ul></div>
+          <div><b style="color:var(--a-ishi)">石垣</b><ul><li>石垣島鍾乳洞</li><li>八重山博物館</li><li>公設市場・ユーグレナモール（アーケード）</li><li>市街の歴史散歩（国吉家のガジュマル・宮良殿内）</li><li>米原のヤシ林（小雨ならむしろ雰囲気が出る）</li></ul></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="course-map-pane">
+      <div id="course-map" aria-label="モデルコースのルート地図"></div>
+      <div class="course-map-head" id="course-map-head"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ================= 予約一覧 ================= -->
+<main id="panel-booking" role="tabpanel" aria-labelledby="tab-booking" hidden>
+<div class="panel-wrap">
+  <p class="lead" style="margin:0">赤字はネットの情報と食い違っている点です。詳しくは <button type="button" class="inline-link" data-goto="notes">注意事項</button> へ。</p>
+
+  <section>
+    <h2 class="sec">飛行機</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>便名</th><th>出発</th><th>到着</th></tr></thead>
+      <tbody>
+        <tr><td>SKY 511<span class="sub">スカイマーク</span></td><td class="mono nowrap">11/22（日）06:30<span class="sub">羽田</span></td><td class="mono nowrap">11/22（日）09:30<span class="sub">那覇</span></td></tr>
+        <tr><td>JTA 605<span class="sub">JAL</span></td><td class="mono nowrap">11/25（水）09:40<span class="sub">那覇</span></td><td class="mono nowrap">11/25（水）10:45<span class="sub">石垣</span><span class="sub flag">時刻をネットで確認できず</span></td></tr>
+        <tr><td>JAL 974<span class="sub">JAL</span></td><td class="mono nowrap">11/27（金）19:20<span class="sub">石垣</span><span class="sub flag">ネットでは 19:10</span></td><td class="mono nowrap">11/27（金）22:00<span class="sub">羽田</span><span class="sub flag">ネットでは 22:10</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2 class="sec">宿</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>施設名</th><th>チェックイン</th><th>チェックアウト</th><th>場所</th></tr></thead>
+      <tbody>
+        <tr><td>Purari<span class="sub">楽天トラベル</span></td><td class="mono nowrap">11/22（日）18:00<span class="sub">宿の案内では15:00〜22:00</span></td><td class="mono nowrap">11/25（水）10:00</td><td>〒904-2173 沖縄県沖縄市比屋根7-20-1<span class="sub"><a href="https://www.google.com/maps/search/?api=1&query=%E6%B2%96%E7%B8%84%E7%9C%8C%E6%B2%96%E7%B8%84%E5%B8%82%E6%AF%94%E5%B1%8B%E6%A0%B97-20-1" target="_blank" rel="noopener">Googleマップ</a></span></td></tr>
+        <tr><td>The Breakfast Hotel Porto 石垣島<span class="sub">楽天トラベル</span></td><td class="mono nowrap">11/25（水）15:00</td><td class="mono nowrap">11/27（金）11:00</td><td>〒907-0004 沖縄県石垣市登野城67<span class="sub flag">ネット上の住所は「登野城86」</span><span class="sub"><a href="https://www.google.com/maps/search/?api=1&query=The%20BREAKFAST%20HOTEL%20PORTO%20%E7%9F%B3%E5%9E%A3%E5%B3%B6" target="_blank" rel="noopener">Googleマップ</a></span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2 class="sec">レンタカー</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>店名</th><th>借りる</th><th>返す（最遅）</th><th>場所</th><th>電話</th></tr></thead>
+      <tbody>
+        <tr><td>トヨタレンタカー 那覇空港店<span class="sub">営業 8:00〜20:00</span></td><td class="mono nowrap">11/22（日）09:30</td><td class="mono nowrap">11/25（水）〜09:00<span class="sub">それより前ならいつでも可</span></td><td>〒901-0154 那覇市赤嶺2-15-11<span class="sub">空港の送迎バス乗り場 11-A から約5分</span></td><td class="mono">098-857-0100</td></tr>
+        <tr><td>トヨタレンタカー 石垣島空港店</td><td class="mono nowrap">11/25（水）11:00</td><td class="mono nowrap">11/27（金）〜19:00<span class="sub">それより前ならいつでも可</span></td><td>〒907-0244 石垣市盛山222-85</td><td class="mono">0980-82-0100</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer class="credit">元データ：旅程メモ（非公開）</footer>
+</div>
+</main>
+
+<!-- ================= 観光スポット ================= -->
+<main id="panel-spots" role="tabpanel" aria-labelledby="tab-spots-honto" hidden>
+  <div class="spots-layout">
+    <div class="map-pane">
+      <div id="map" aria-label="観光スポットの地図"></div>
+      <div class="map-legend" aria-hidden="true">
+        <span data-isl="honto"><i style="background:var(--a-north)"></i>本島北部</span>
+        <span data-isl="honto"><i style="background:var(--a-central)"></i>本島中部</span>
+        <span data-isl="honto"><i style="background:var(--a-south)"></i>那覇・南部</span>
+        <span data-isl="ishi"><i style="background:var(--a-ishi)"></i>石垣・竹富</span>
+        <span><i class="base"></i>宿・空港・港</span>
+      </div>
+    </div>
+
+    <div class="list-pane" id="list-pane">
+      <div class="filters">
+        <div class="frow" data-group="area"><span class="fl">エリア</span></div>
+        <div class="frow" data-group="pri"><span class="fl">優先度</span></div>
+        <div class="frow" data-group="cat"><span class="fl">カテゴリ</span></div>
+      </div>
+      <div class="list-tools">
+        <span id="count"></span>
+        <button type="button" id="export-kml" title="Googleマイマップにインポートできるファイルを保存します">Googleマイマップ用に書き出す（KML）</button>
+      </div>
+      <div id="list"></div>
+      <footer class="credit">写真：Wikimedia Commons（各画像の作者・ライセンスに従う）／地図：国土地理院 地理院タイル（淡色地図）。位置はおおよそのものを含みます。</footer>
+    </div>
+  </div>
+</main>
+
+<!-- ================= 注意事項 ================= -->
+<main id="panel-notes" role="tabpanel" aria-labelledby="tab-notes" hidden>
+<div class="panel-wrap">
+
+  <section>
+    <h2 class="sec">予約内容とネット情報の食い違い <small>予約サイトの確認画面で見直したいもの</small></h2>
+    <div class="notes">
+      <div class="note high"><span class="lv">要確認</span><b>JAL 974（11/27 石垣→羽田）の時刻</b>
+        <p>予約メモは 19:20発 / 22:00着。ネットの運航データでは 19:10発 / 22:10着 が多く出てきます。冬ダイヤで変わった可能性もあるので、JALの予約画面で確認してください。早まっている場合、空港には遅くとも18:00ごろまでに着きたいです。</p>
+        <p class="src">参考：<a href="https://www.airpaz.com/en/flight/code/JL-974" target="_blank" rel="noopener">Airpaz</a>・<a href="https://jp.trip.com/flights/status-jl974/" target="_blank" rel="noopener">Trip.com</a>（いずれも2026年夏ごろのデータ）</p></div>
+      <div class="note high"><span class="lv">要確認</span><b>JTA 605（11/25 那覇→石垣）の時刻</b>
+        <p>予約メモは 9:40発 / 10:45着。ネットでは JTA 605 の11月の時刻を確認できませんでした。同じ番号の便が夏に 9:30発 / 10:25着 で運航していた記録があります。出発が10分早まっていると、朝の余裕がさらに減ります。</p>
+        <p class="src">参考：<a href="https://jp.trip.com/flights/status-nu605/" target="_blank" rel="noopener">Trip.com NU605</a></p></div>
+      <div class="note mid"><span class="lv">確認</span><b>Porto 石垣島の住所</b>
+        <p>予約メモは「登野城67」、じゃらん・Relux・るるぶなどは「登野城86」。カーナビには施設名で入れるのが安全です。</p>
+        <p class="src">参考：<a href="https://www.jalan.net/yad327497" target="_blank" rel="noopener">じゃらん</a>・<a href="https://rlx.jp/23056/" target="_blank" rel="noopener">Relux</a></p></div>
+      <div class="note info"><span class="lv">メモ</span><b>Purari のチェックインは15:00からできる可能性</b>
+        <p>予約メモは18:00ですが、宿の案内は 15:00〜22:00 受付です。早く戻ってきたい日があれば使えます。</p>
+        <p class="src">参考：<a href="https://www.jalan.net/yad345250/" target="_blank" rel="noopener">じゃらん</a>・<a href="https://newt.net/hotel/jpn/e893678" target="_blank" rel="noopener">NEWT</a></p></div>
+      <div class="note done"><span class="lv">修正済</span><b>トヨタレンタカー那覇空港店の電話番号</b>
+        <p>098-857-0100 に直しました（公式サイトの店舗一覧で確認）。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">乗り継ぎ・時間の余裕</h2>
+    <div class="notes">
+      <div class="note mid"><span class="lv">時間</span><b>11/25 朝：宿 → 返却 → 9:40発</b>
+        <ul>
+          <li>那覇空港店の開店は8:00。8:00に返却するのが最速です（返却期限の9:00より前ならいつでも可）。</li>
+          <li>送迎バスで空港まで約5分。手荷物を預けるなら出発の20分前が締切の目安です。</li>
+          <li>沖縄市から那覇は朝の渋滞で1時間前後かかることがあるので、宿は7:00ごろに出ます。チェックアウトの期限は10:00なので問題ありません。</li>
+        </ul></div>
+      <div class="note mid"><span class="lv">時間</span><b>11/27 夕方：返却 → 19:20発</b>
+        <p>返却は19:00まで可能ですが、送迎と搭乗手続きを考えて17:30〜17:45ごろの返却が目安です。出発が19:10の場合も、これなら間に合います。</p></div>
+      <div class="note info"><span class="lv">時間</span><b>11/22 朝：羽田 6:30発</b>
+        <p>早朝便なので、始発で羽田に間に合うかを前日までに確認してください。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">予約・条件がある場所</h2>
+    <div class="notes">
+      <div class="note high"><span class="lv">首里城</span><b>11/22は終日休園、11/23は有料区域が12:00から</b>
+        <ul>
+          <li>11/22は正殿の復元完成式のため終日休園です。</li>
+          <li>11/23の午前は式典のため、無料区域は11:15まで、有料区域は12:00まで入れません。祝日で公開初日なので混雑が見込まれます。</li>
+          <li>正殿の中を見ない場合は予約不要です。「入場券（正殿内観覧予約なし）」で奉神門の先の有料区域に入れて、見学デッキから正殿の外観を見られます。</li>
+          <li>入場料は大人1,000円（11/23から値上げ）。</li>
+        </ul>
+        <p class="src">参考：<a href="https://oki-park.jp/shurijo/information/detail/11419" target="_blank" rel="noopener">首里城公園 公式（臨時休園のお知らせ）</a>・<a href="https://www.okinawastory.jp/news/tourism/4740" target="_blank" rel="noopener">おきなわ物語</a>・<a href="https://travel.watch.impress.co.jp/docs/news/2133105.html" target="_blank" rel="noopener">トラベル Watch</a></p></div>
+      <div class="note mid"><span class="lv">要予約</span><b>ガンガラーの谷はガイドツアーのみ</b>
+        <p>出発時刻が決まった定員制（10:00・12:00・14:00・16:00ごろ）。所要約80〜90分、大人2,500円。前日17:30までは無料でキャンセルできます。小雨なら開催されます。</p>
+        <p class="src">参考：<a href="https://book.gangala.com/?lng=ja-JP" target="_blank" rel="noopener">公式予約サイト</a>・<a href="https://www.his-j.com/okinawa/op/activity/detail/?opid=1262" target="_blank" rel="noopener">HIS</a></p></div>
+      <div class="note info"><span class="lv">条件</span><b>美ら海水族館</b>
+        <p>10〜2月は 8:30〜18:30、入館は17:30まで。</p></div>
+      <div class="note info"><span class="lv">条件</span><b>竹富島への船</b>
+        <p>石垣港離島ターミナルから2社（八重山観光フェリー・安栄観光）が15分おきくらいに運航。約10〜15分、片道700円前後。強風の日は欠航・減便があります。</p>
+        <p class="src">参考：<a href="https://skyticket.jp/ferry/taketomi-ishigaki/" target="_blank" rel="noopener">skyticket</a>・<a href="https://www.nap-camp.com/mag/112834" target="_blank" rel="noopener">なっぷ</a></p></div>
+      <div class="note info"><span class="lv">条件</span><b>川平湾</b>
+        <p>湾内は遊泳禁止。グラスボートは予約なしで現地で買えます。海が荒れていると運休・航路短縮あり。</p></div>
+      <div class="note info"><span class="lv">条件</span><b>石垣島鍾乳洞</b>
+        <p>9:00〜18:30（受付18:00まで）、見学約30分、大人1,100円。年中無休。</p>
+        <p class="src">参考：<a href="https://rurubu.jp/andmore/spot/80042710" target="_blank" rel="noopener">るるぶ</a></p></div>
+      <div class="note mid"><span class="lv">要予約</span><b>夕食の店</b>
+        <ul>
+          <li>ひとし（石垣）：人気店で予約なしでは入りにくい。25日の夜に行くなら早めに予約。</li>
+          <li>ぱいかじ・とぅばらーま（那覇・国際通り）：民謡ライブ目当てなら予約しておくと安心。</li>
+          <li>ビーフィーズ（北谷）：ネット予約可。</li>
+          <li>どの店も、運転する人はお酒なし。</li>
+        </ul></div>
+      <div class="note info"><span class="lv">条件</span><b>その他</b>
+        <ul>
+          <li>やちむんの里：工房ごとに営業日が違う。</li>
+          <li>ビーチ51：専用駐車場なし。真栄田岬の駐車場から歩く。</li>
+          <li>ケイブ沖縄・ビオスの丘：営業時間は公式サイトで確認。</li>
+        </ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">天気・混雑</h2>
+    <div class="notes">
+      <div class="note mid"><span class="lv">天気</span><b>24日（本島）と26日（石垣）は雨予報</b>
+        <p>24日は午前に雨、午後は風10m/sほど。26日の石垣は夕方まで雨。竹富島を26日にすると雨の中になる可能性が高いので、モデルコースAでは25日の午後に前倒ししています。</p></div>
+      <div class="note info"><span class="lv">混雑</span><b>23日は祝日＋首里城正殿の公開初日</b>
+        <p>首里城の周辺道路と駐車場は混むと考えておきます。</p></div>
+    </div>
+  </section>
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+  /* ---------- データ ---------- */
+  var AREAS = {
+    north:   { label: '本島北部',   css: 'north' },
+    central: { label: '本島中部',   css: 'central' },
+    south:   { label: '那覇・南部', css: 'south' },
+    ishi:    { label: '石垣・竹富', css: 'ishi' }
+  };
+  var PRI = { must: 'Must go', want: '気になる', low: '優先度低' };
+  var CATS = {
+    aqua:   '水族館・博物館',
+    castle: '城・史跡',
+    walk:   '街歩き',
+    nature: '自然・景色',
+    cave:   '洞窟',
+    culture:'文化・体験',
+    shop:   'ショッピング',
+    island: '離島・ビーチ',
+    food:   'レストラン・カフェ'
+  };
+  var W = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/';
+  var FP = 'https://commons.wikimedia.org/wiki/Special:FilePath/';
+
+  var SPOTS = [
+    { name: '美ら海水族館', pri: 'must', area: 'north', cat: 'aqua', rain: true, lat: 26.6947, lng: 127.8778,
+      loc: '本部町・海洋博公園内', q: '沖縄美ら海水族館',
+      note: '8:30〜18:30（入館17:30まで）。フクギ並木・今帰仁城跡・海洋文化館がすぐ近く。',
+      img: W + 'e/e0/Churaumi_Aquarium_main_tank_%27Kuroshio_Sea%27.jpg/500px-Churaumi_Aquarium_main_tank_%27Kuroshio_Sea%27.jpg' },
+    { name: '首里城', pri: 'must', area: 'south', cat: 'castle', lat: 26.2170, lng: 127.7195,
+      loc: '那覇市首里', q: '首里城公園',
+      note: '11/22は休園、11/23の有料区域は12:00から。正殿の中を見なければ予約不要（大人1,000円）。',
+      img: W + '5/56/Naha_Okinawa_Japan_Shuri-Castle-01.jpg/500px-Naha_Okinawa_Japan_Shuri-Castle-01.jpg' },
+    { name: '金城町石畳道 散歩', pri: 'must', area: 'south', cat: 'walk', lat: 26.2141, lng: 127.7173,
+      loc: '那覇市首里金城町', q: '首里金城町石畳道',
+      note: '首里城から徒歩圏。急な石畳の坂なので歩きやすい靴で。',
+      img: W + '9/9d/Kinjocho_ishidatami-michi_Shuri_Naha04n4272.jpg/500px-Kinjocho_ishidatami-michi_Shuri_Naha04n4272.jpg' },
+    { name: '竹富島 全域散歩', pri: 'must', area: 'ishi', cat: 'island', lat: 24.3285, lng: 124.0875,
+      loc: '石垣港離島ターミナルから高速船 約15分', q: '竹富島',
+      note: '船は15分おきくらい。島は半日で一通り回れる。強風の日は欠航あり。',
+      img: W + '7/7c/Village_in_Taketomi_Island_-_located_at_southwest_Japan.jpg/500px-Village_in_Taketomi_Island_-_located_at_southwest_Japan.jpg' },
+    { name: 'アメリカンビレッジ', pri: 'must', area: 'central', cat: 'shop', rain: true, lat: 26.3162, lng: 127.7567,
+      loc: '北谷町美浜', q: '美浜アメリカンビレッジ',
+      note: 'ホテルから車で約20分。夕日の時間（17:38ごろ）に合わせると◎。',
+      img: W + '0/09/Mihama_AV_D_Japan.jpg/500px-Mihama_AV_D_Japan.jpg' },
+
+    { name: 'やちむんの里', pri: 'want', area: 'central', cat: 'culture', lat: 26.4045, lng: 127.7450,
+      loc: '読谷村座喜味（メモの「ヤンチムの里」）', q: 'やちむんの里 読谷村',
+      note: '工房のギャラリーやショップをのぞいて器を買う、大きな登り窯を見る、カフェで休む、が定番。体験なしでも1〜1.5時間。工房ごとに休みが違う。',
+      img: FP + 'Yomitan_Yachimun_no_Sato.jpg?width=480' },
+    { name: 'やんばるの大きなガジュマル', pri: 'want', area: 'north', cat: 'nature', lat: 26.5917, lng: 127.9775, approx: true,
+      loc: '場所未定（ピンは仮に名護の「ひんぷんガジュマル」）', q: 'ひんぷんガジュマル',
+      note: 'どの木を見たいか決まったら差し替える。石垣なら「国吉家のガジュマル巨木」が近い雰囲気。',
+      img: W + 'b/ba/Hinpun_Gajumaru.jpg/500px-Hinpun_Gajumaru.jpg' },
+    { name: '備瀬のフクギ並木', pri: 'want', area: 'north', cat: 'walk', lat: 26.7014, lng: 127.8803,
+      loc: '本部町備瀬', q: '備瀬のフクギ並木',
+      note: '美ら海のすぐ隣。木が茂っているので小雨なら歩ける。',
+      img: W + 'a/a7/Fukugi_trees_at_Bise_Village%2C_Okinawa.jpg/500px-Fukugi_trees_at_Bise_Village%2C_Okinawa.jpg' },
+    { name: '沖縄ワールド（玉泉洞）', pri: 'want', area: 'south', cat: 'cave', rain: true, lat: 26.1386, lng: 127.7514,
+      loc: '南城市玉城', q: 'おきなわワールド',
+      note: 'ガンガラーの谷の向かい。セットで回れる。',
+      img: W + 'c/c8/Gyokusendo_Nanjo_Okinawa_Japan02s3104.jpg/500px-Gyokusendo_Nanjo_Okinawa_Japan02s3104.jpg' },
+    { name: '石垣島鍾乳洞', pri: 'want', area: 'ishi', cat: 'cave', rain: true, lat: 24.3560, lng: 124.1700, approx: true,
+      loc: '石垣市石垣', q: '石垣島鍾乳洞',
+      note: '9:00〜18:30（受付18:00まで）、見学約30分、大人1,100円。',
+      img: W + '4/45/Ishigaki-Cave24s5s4592.jpg/500px-Ishigaki-Cave24s5s4592.jpg' },
+    { name: 'ガンガラーの谷', pri: 'want', area: 'south', cat: 'nature', rsv: true, lat: 26.1405, lng: 127.7488,
+      loc: '南城市玉城', q: 'ガンガラーの谷',
+      note: 'ガイドツアーのみ（約80〜90分・大人2,500円）。小雨なら開催。',
+      img: W + '4/42/%E3%82%AC%E3%83%B3%E3%82%AC%E3%83%A9%E3%83%BC%E3%81%AE%E8%B0%B7%EF%BC%88%E6%B2%96%E7%B8%84%EF%BC%89.jpg/500px-%E3%82%AC%E3%83%B3%E3%82%AC%E3%83%A9%E3%83%BC%E3%81%AE%E8%B0%B7%EF%BC%88%E6%B2%96%E7%B8%84%EF%BC%89.jpg' },
+    { name: '琉球村', pri: 'want', area: 'central', cat: 'culture', lat: 26.4300, lng: 127.7740, approx: true,
+      loc: '恩納村山田', q: '琉球村 恩納村',
+      note: '移築した古民家＋エイサーなどの公演（10:00・16:00の道ジュネーが人気）。9:30〜17:00、大人2,000円。公演を見ないと1時間で回れる。古い集落は竹富島で本物が見られるので優先度は低め。',
+      img: W + '3/32/Ryukyu_Mura_entrance.jpg/500px-Ryukyu_Mura_entrance.jpg' },
+    { name: 'ビオスの丘', pri: 'want', area: 'central', cat: 'nature', lat: 26.4440, lng: 127.8300, approx: true,
+      loc: 'うるま市石川', q: 'ビオスの丘',
+      note: 'ケイブ沖縄と同じ石川エリア。', img: '' },
+    { name: 'ケイブ沖縄', pri: 'want', area: 'central', cat: 'cave', rain: true, lat: 26.4290, lng: 127.8250, approx: true,
+      loc: 'うるま市石川嘉手苅（石川ICから約5分）', q: 'CAVE OKINAWA ケイブ沖縄',
+      note: '鍾乳洞。美ら海からの帰り道に寄れる。営業時間は要確認。', img: '' },
+    { name: '海中展望塔', pri: 'want', area: 'north', cat: 'aqua', lat: 26.5440, lng: 127.9665, approx: true,
+      loc: '名護市・ブセナ海中公園', q: 'ブセナ海中公園 海中展望塔',
+      note: '美ら海へ向かう途中に寄れる。',
+      img: W + 'b/bc/Busena_Resort05bs3200.jpg/500px-Busena_Resort05bs3200.jpg' },
+    { name: '勝連城跡', pri: 'want', area: 'central', cat: 'castle', lat: 26.3302, lng: 127.8789,
+      loc: 'うるま市勝連', q: '勝連城跡',
+      note: '宿から車で約25分。ほかのスポットからは外れた東側にあるので、海中道路のドライブとセットにするか、朝いちに単独で行くのがよい。',
+      img: W + '7/71/Katsuren_Castle_ruins.jpg/500px-Katsuren_Castle_ruins.jpg' },
+    { name: '川平湾', pri: 'want', area: 'ishi', cat: 'nature', lat: 24.4514, lng: 124.1444,
+      loc: '石垣市川平（市街から車で約30分）', q: '川平公園 展望台',
+      note: '展望台と浜の散歩だけでも十分。遊泳禁止。グラスボートは現地で購入でき、海が穏やかな日だけ。晴れた昼前後が一番きれい。',
+      img: W + '9/90/Kabira-Bay-Kabira-park-2019.jpg/500px-Kabira-Bay-Kabira-park-2019.jpg' },
+    { name: '国吉家のガジュマル巨木', pri: 'want', area: 'ishi', cat: 'nature', lat: 24.3440, lng: 124.1530, approx: true,
+      loc: '石垣市石垣250（市街地・桃林寺の近く）', q: '国吉家のガジュマル',
+      note: '樹齢200〜300年とされ、塀を飲み込むほどの巨木。民家の敷地なので外から見るだけ（駐車場なし）。桃林寺・宮良殿内と合わせて市街の散歩に。川平の近くには「キジムナーの宿る森」と呼ばれるガジュマルのトンネルもある。',
+      img: '' },
+    { name: '米原のヤエヤマヤシ群落', pri: 'want', area: 'ishi', cat: 'nature', lat: 24.4500, lng: 124.1920, approx: true,
+      loc: '石垣市米原（川平湾から車で約10分）', q: '米原のヤエヤマヤシ群落',
+      note: 'ヤシが密集するジャングルの中を短い遊歩道で歩ける天然記念物。小雨くらいならむしろ雰囲気が出る。',
+      img: '' },
+
+    { name: 'ウミカジテラス', pri: 'low', area: 'south', cat: 'shop', lat: 26.1745, lng: 127.6440,
+      loc: '豊見城市・瀬長島', q: '瀬長島ウミカジテラス',
+      note: '那覇空港から近い。11/22の到着直後に寄りやすい。',
+      img: W + '5/5d/Senaga_Island_20091027-gsi.jpg/500px-Senaga_Island_20091027-gsi.jpg' },
+    { name: '残波岬', pri: 'low', area: 'central', cat: 'nature', lat: 26.4407, lng: 127.7135,
+      loc: '読谷村', q: '残波岬',
+      note: '高さ約30mの断崖と灯台（上れる）。景色を見て15〜30分で終わるので、やちむんの里のついでに気が向いたら程度。',
+      img: W + '7/70/Cliff_of_Cape_Zampa.JPG/500px-Cliff_of_Cape_Zampa.JPG' },
+    { name: '久高島ロマンスロード', pri: 'low', area: 'south', cat: 'island', lat: 26.1600, lng: 127.8880, approx: true,
+      loc: '南城市・安座真港からフェリー', q: '久高島',
+      note: '船移動があるので半日は必要。',
+      img: W + '2/2f/Kudaka_Island_gsi-20050124.jpg/500px-Kudaka_Island_gsi-20050124.jpg' },
+    { name: 'ビーチ51（ザネー浜）', pri: 'low', area: 'central', cat: 'island', lat: 26.4415, lng: 127.7700, approx: true,
+      loc: '恩納村前田', q: 'ザネー浜',
+      note: '専用駐車場なし。真栄田岬の駐車場から歩く。',
+      img: FP + 'Cape_Maeda.jpg?width=480' },
+    { name: '海洋文化館', pri: 'low', area: 'north', cat: 'aqua', rain: true, lat: 26.6870, lng: 127.8782, approx: true,
+      loc: '海洋博公園内', q: '海洋博公園 海洋文化館',
+      note: '美ら海の日が雨だった場合の時間つぶし候補。',
+      img: W + '0/0f/20080327Iejima%26KaiyohakuPark.jpg/500px-20080327Iejima%26KaiyohakuPark.jpg' },
+    { name: '今帰仁城跡', pri: 'low', area: 'north', cat: 'castle', lat: 26.6908, lng: 127.9298,
+      loc: '今帰仁村', q: '今帰仁城跡',
+      note: '美ら海から車で約15分なので同じ日に入れやすい。8:00〜18:00（最終入城17:30）。',
+      img: W + '7/7d/Nakijin_Okinawa_Japan_Nakikjin-Castle-01.jpg/500px-Nakijin_Okinawa_Japan_Nakikjin-Castle-01.jpg' },
+
+    /* ---- 石垣の追加スポット ---- */
+    { name: '石垣市立八重山博物館', pri: 'want', area: 'ishi', cat: 'aqua', rain: true, lat: 24.3381, lng: 124.1596,
+      loc: '石垣市登野城（ホテルから徒歩圏）', q: '石垣市立八重山博物館',
+      note: '八重山の民具・古文書・織物など。所要30分〜1時間。月曜休館。雨の日の市街散歩の起点に。',
+      img: W + '1/16/Yaeyama_Museum%2C_Ishigaki%2C_Japan.JPG/500px-Yaeyama_Museum%2C_Ishigaki%2C_Japan.JPG' },
+    { name: '石垣市公設市場・ユーグレナモール', pri: 'want', area: 'ishi', cat: 'shop', rain: true, lat: 24.3395, lng: 124.1580,
+      loc: '石垣市大川（ホテルから徒歩圏）', q: '石垣市公設市場',
+      note: 'アーケード商店街なので雨でも歩ける。市場の2階はおみやげ、周りに食堂やカフェも多い。',
+      img: W + '9/91/Ishigaki_euglena_mall_2012.jpg/500px-Ishigaki_euglena_mall_2012.jpg' },
+    { name: '宮良殿内', pri: 'low', area: 'ishi', cat: 'castle', lat: 24.3411, lng: 124.1597,
+      loc: '石垣市大川', q: '宮良殿内',
+      note: '琉球王朝時代の士族の屋敷と枯山水の庭（国の重要文化財・名勝）。国吉家のガジュマルと合わせて歩ける。',
+      img: W + '9/92/Miyara-dounchi.jpg/500px-Miyara-dounchi.jpg' },
+    { name: '石垣やいま村', pri: 'want', area: 'ishi', cat: 'culture', lat: 24.4043, lng: 124.1444,
+      loc: '石垣市名蔵（市街から車で約20分）', q: '石垣やいま村',
+      note: '移築した古民家、リスザルとふれあえる森、マングローブの遊歩道。9:00〜17:30、大人1,200円。一部は屋内で、小雨なら回れる。',
+      img: W + '5/56/%E7%9F%B3%E5%9E%A3%E3%82%84%E3%81%84%E3%81%BE%E6%9D%91_-_panoramio.jpg/500px-%E7%9F%B3%E5%9E%A3%E3%82%84%E3%81%84%E3%81%BE%E6%9D%91_-_panoramio.jpg' },
+    { name: '名蔵アンパル', pri: 'low', area: 'ishi', cat: 'nature', lat: 24.3944, lng: 124.1436,
+      loc: '石垣市名蔵（やいま村のすぐ近く）', q: '名蔵アンパル',
+      note: 'ラムサール条約に登録されたマングローブの干潟。展望デッキから眺めるだけでも雰囲気がある。',
+      img: W + '9/9e/Anparu.jpg/500px-Anparu.jpg' },
+    { name: '宮良川のヒルギ林', pri: 'low', area: 'ishi', cat: 'nature', lat: 24.3560, lng: 124.2170, approx: true,
+      loc: '石垣市宮良（空港と市街の間）', q: '宮良川のヒルギ林',
+      note: 'マングローブの林。カヌーやSUPのツアーが定番（要予約）。雨でもツアーは開催されることが多い。',
+      img: W + 'c/ca/Mangrove_of_Miyara_River.jpg/500px-Mangrove_of_Miyara_River.jpg' },
+    { name: '請福酒造', pri: 'low', area: 'ishi', cat: 'culture', rain: true, lat: 24.3560, lng: 124.2080, approx: true,
+      loc: '石垣市宮良', q: '請福酒造',
+      note: '八重山の泡盛の酒造。売店で試飲ができる（運転する人は飲めないので注意）。見学の可否は事前に確認。',
+      img: W + 'c/c0/Seifuku_Distillery.jpg/500px-Seifuku_Distillery.jpg' },
+    { name: '唐人墓', pri: 'low', area: 'ishi', cat: 'castle', lat: 24.3657, lng: 124.1133,
+      loc: '石垣市新川（御神崎へ向かう道の途中）', q: '唐人墓',
+      note: '極彩色の中国風の墓。西海岸ドライブのついでに数分で見られる。',
+      img: W + '8/8f/Tojin-baka_Ishigaki_Island_Japan01bs5s4290.jpg/500px-Tojin-baka_Ishigaki_Island_Japan01bs5s4290.jpg' },
+    { name: '御神崎', pri: 'low', area: 'ishi', cat: 'nature', lat: 24.4569, lng: 124.0897, approx: true,
+      loc: '石垣市崎枝（川平湾から車で約15分）', q: '御神崎灯台',
+      note: '西の端の岬。夕日の名所（日没は17:55ごろ）。', img: '' },
+    { name: 'バンナ公園 エメラルドの海を見る展望台', pri: 'want', area: 'ishi', cat: 'nature', lat: 24.3785, lng: 124.1745, approx: true,
+      loc: '石垣市石垣（市街から車で約10分）', q: 'バンナ公園 エメラルドの海を見る展望台',
+      note: '市街と海、竹富島まで見渡せる無料の展望台。雨が上がった合間に寄りやすい。', img: '' },
+    { name: '玉取崎展望台', pri: 'want', area: 'ishi', cat: 'nature', lat: 24.4995, lng: 124.2820, approx: true,
+      loc: '石垣市伊原間（空港から車で約20分）', q: '玉取崎展望台',
+      note: '島がくびれた部分を両側の海ごと見下ろせる展望台。北部ドライブの定番。', img: '' },
+    { name: '平久保崎灯台', pri: 'low', area: 'ishi', cat: 'nature', lat: 24.6066, lng: 124.3168, approx: true,
+      loc: '石垣島の最北端（玉取崎から車で約30分）', q: '平久保埼灯台',
+      note: '白い灯台と両側に広がる海。遠いので、北部ドライブに時間がある日に。', img: '' },
+    { name: '白保の海と集落', pri: 'low', area: 'ishi', cat: 'island', lat: 24.3640, lng: 124.2470, approx: true,
+      loc: '石垣市白保（空港から車で約10分）', q: '白保海岸',
+      note: '世界有数のアオサンゴ群落がある海と、赤瓦・石垣の残る集落。空港に近いので最終日の時間調整に。', img: '' },
+    { name: '西表島・由布島（日帰り）', pri: 'low', area: 'ishi', cat: 'island', lat: 24.3428, lng: 123.9336,
+      loc: '石垣港から高速船 約40〜50分', q: '由布島',
+      note: '水牛車で浅い海を渡る由布島と、マングローブのクルーズ。半日〜1日かかるので、竹富島より優先するなら。',
+      img: W + 'd/d9/Iriomote_yubujima_COK20122X-C3-21.jpg/500px-Iriomote_yubujima_COK20122X-C3-21.jpg' },
+
+    /* ---- レストラン・カフェ（希望の6軒） ---- */
+    { name: '百年古家 大家（うふやー）', pri: 'want', area: 'north', cat: 'food', rain: true, lat: 26.6110, lng: 128.0020, approx: true,
+      loc: '名護市中山90', q: '百年古家 大家', link: 'https://rurubu.jp/andmore/spot/80042850',
+      note: '築100年超の古民家でアグー豚料理（しゃぶしゃぶ・そば）。昼11:00〜（LO15:30）・夜17:30〜。美ら海の帰りの昼食に。' },
+    { name: 'とぅばらーま', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2150, lng: 127.6870, approx: true,
+      loc: '那覇・国際通り（店名は「島唄と地料理 とぅばらーま」）', q: '島唄と地料理 とぅばらーま 国際通り', link: 'https://r.gnavi.co.jp/f144701/',
+      note: '毎晩2階で三線・島唄ライブ（19:00/20:00/21:00）。石垣ではなく那覇の店。' },
+    { name: '土夢 ごはんカフェ', pri: 'want', area: 'south', cat: 'food', lat: 26.1530, lng: 127.6720, approx: true,
+      loc: '糸満市（西崎店・琉球ガラス村店の2店舗）', q: '土夢 ごはんカフェ 西崎店', link: 'https://retty.me/restaurant/100001013249/',
+      note: 'カフェごはん。ガラス村店は11:00〜17:00・水曜休。南部（ガンガラーの谷・玉泉洞）の日の昼食向き。' },
+    { name: 'A&W（牧港店）', pri: 'want', area: 'central', cat: 'food', rain: true, lat: 26.2618, lng: 127.7165, approx: true,
+      loc: '浦添市牧港4-9-1（北谷の美浜店も宿から近い）', q: 'A&W 牧港店', link: 'https://tabelog.com/okinawa/A4703/A470404/47000030/',
+      note: '沖縄のファストフードの定番。6:00〜翌2:00、ドライブインもある。ルートビアはおかわり自由。' },
+    { name: 'ジャッキー ステーキハウス', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2140, lng: 127.6730, approx: true,
+      loc: '那覇市西（旭橋の近く）', q: 'ジャッキーステーキハウス', link: 'https://steak.co.jp/',
+      note: '創業69年の老舗ステーキハウス。混むので早めの時間がおすすめ。' },
+    { name: 'ぱいかじ（国際通り店）', pri: 'want', area: 'south', cat: 'food', rain: true, lat: 26.2155, lng: 127.6820, approx: true,
+      loc: '那覇市久茂地3-29-68 2階', q: '沖縄の台所 ぱいかじ 国際通り店', link: 'https://r.gnavi.co.jp/f293222/',
+      note: '沖縄料理と毎晩の三線・民謡ライブ。17:00〜24:00。上之屋店は閉店しているので国際通り店へ。石垣の店ではない。' },
+
+    /* ---- レストラン・カフェ（紹介された店） ---- */
+    { name: 'シーサイドステーキ ビーフィーズ', pri: 'low', area: 'central', cat: 'food', lat: 26.3110, lng: 127.7550, approx: true,
+      loc: '北谷町（アメリカンビレッジ周辺）', q: 'シーサイド ステーキ ビーフィーズ 北谷', link: 'https://tabelog.com/okinawa/A4703/A470304/47021880',
+      note: '海を望むテラスのステーキ店。ネット予約可。アメリカンビレッジの夕日のあとに。' },
+    { name: 'ZHYVAGO COFFEE（北谷）', pri: 'low', area: 'central', cat: 'food', lat: 26.3150, lng: 127.7535, approx: true,
+      loc: '北谷町美浜（アメリカンビレッジの海沿い）', q: 'ZHYVAGO COFFEE WORKS OKINAWA',
+      note: '海沿いのコーヒースタンド（WORKS）と焙煎所（ROASTERY）の2店。夕日待ちに。' },
+    { name: 'ジミー（Jimmy\'s）', pri: 'low', area: 'central', cat: 'food', lat: 26.2820, lng: 127.7400, approx: true,
+      loc: '宜野湾市大山ほか県内各地', q: 'ジミー 大山店', link: 'https://www.jimmys.co.jp/',
+      note: '沖縄の老舗洋菓子店。ジャーマンケーキやアップルパイ。おみやげにも。' },
+    { name: 'JEF 豊見城店（ぬーやるバーガー）', pri: 'low', area: 'south', cat: 'food', lat: 26.1617, lng: 127.6640, approx: true,
+      loc: '豊見城市（那覇空港から車で約10分）', q: 'JEF 豊見城店', link: 'https://jefokinawa.co.jp/item/%E3%81%AC%E3%83%BC%E3%82%84%E3%82%8B%E3%83%90%E3%83%BC%E3%82%AC%E3%83%BC/',
+      note: 'ゴーヤー入りの「ぬーやるバーガー」が名物の沖縄ローカルバーガー。到着日の軽い昼食に。' },
+    { name: '高良食堂', pri: 'low', area: 'south', cat: 'food', lat: 26.2228, lng: 127.6738, approx: true,
+      loc: '那覇市若狭', q: '高良食堂 那覇', link: 'https://mainichibeer.jp/naha-takarashokudo/',
+      note: '安くて量が多い昔ながらの大衆食堂。' },
+    { name: '首里殿内（すいどぅんち）', pri: 'low', area: 'south', cat: 'food', lat: 26.2130, lng: 127.7170, approx: true,
+      loc: '那覇市首里金城町（石畳道沿い）', q: '首里殿内', link: 'https://omorokikaku.com/sui/',
+      note: '泡盛と創作沖縄料理。石畳道の途中にあり、首里城の日の昼食か休憩に。' },
+    { name: 'おかずの店 べんり屋', pri: 'low', area: 'south', cat: 'food', lat: 26.2173, lng: 127.6967, approx: true,
+      loc: '那覇市・栄町市場', q: 'べんり屋 栄町市場', link: 'https://ameblo.jp/hat1987/entry-12799274642.html',
+      note: 'レトロな栄町市場の中の店。路地の雰囲気ごと楽しむ場所。' },
+    { name: '魚まる（魚屋直営食堂）', pri: 'low', area: 'south', cat: 'food', lat: 26.1970, lng: 127.6620, approx: true,
+      loc: '那覇市小禄ほか（那覇・浦添に4店）', q: '魚まる 小禄店', link: 'https://uomaru.ti-da.net/',
+      note: '魚屋直営の海鮮定食。那覇の店（石垣ではない）。' },
+    { name: 'ひとし（本店・石敢當店）', pri: 'want', area: 'ishi', cat: 'food', rsv: true, lat: 24.3410, lng: 124.1590, approx: true,
+      loc: '石垣市街（ホテルから徒歩圏）', q: 'ひとし 本店 石垣', link: 'https://tabelog.com/okinawa/A4705/A470501/47001373/',
+      note: '石垣で一番人気クラスの海鮮居酒屋。予約しないと入りにくいので早めに電話かネットで。' },
+    { name: '石垣牛ケバブ Kaboo', pri: 'want', area: 'ishi', cat: 'food', lat: 24.4525, lng: 124.1455, approx: true,
+      loc: '石垣市川平917-1（川平湾のすぐそば）', q: '石垣牛ケバブ Kaboo',
+      note: '石垣牛のケバブ。川平湾を見たあとの軽い昼食に。' }
+  ];
+  SPOTS.forEach(function (s, i) { s.id = i + 1; });
+  // 表示用の番号は島ごとに 1 から振る（本島・石垣それぞれのタブで連番になるように）
+  (function () {
+    var n = { honto: 0, ishi: 0 };
+    ['must', 'want', 'low'].forEach(function (p) {
+      SPOTS.forEach(function (s) {
+        if (s.pri !== p) return;
+        s.isl = s.area === 'ishi' ? 'ishi' : 'honto';
+        s.no = ++n[s.isl];
+      });
+    });
+  })();
+
+  var BASES = [
+    { label: '宿', name: 'Purari（本島の宿）', lat: 26.3215, lng: 127.8090, q: '沖縄県沖縄市比屋根7-20-1' },
+    { label: '宿', name: 'Porto 石垣島（石垣の宿）', lat: 24.3405, lng: 124.1605, q: 'The BREAKFAST HOTEL PORTO 石垣島' },
+    { label: '✈', name: '那覇空港', lat: 26.1958, lng: 127.6459, q: '那覇空港' },
+    { label: '✈', name: '石垣空港', lat: 24.3964, lng: 124.2450, q: '石垣空港' },
+    { label: '港', name: '石垣港離島ターミナル', lat: 24.3377, lng: 124.1556, q: '石垣港離島ターミナル' }
+  ];
+
+  function gmSearch(q) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q); }
+  function gmDir(q) { return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(q); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------- タブ ---------- */
+  var PANELS = ['shiori', 'course', 'booking', 'spots', 'notes'];
+  var TABS = ['shiori', 'course', 'booking', 'spots-honto', 'spots-ishi', 'notes'];
+  var island = 'honto';   // スポットタブで表示中の島
+  var mapReady = false;
+  var HAS_L = typeof L !== 'undefined';   // 地図ライブラリが読めない（オフライン等）ときは一覧だけ表示
+  function mapFallback(id) {
+    var el = document.getElementById(id);
+    if (el && !el.dataset.fallback) {
+      el.dataset.fallback = '1';
+      el.innerHTML = '<p style="padding:24px;font-size:.9rem;color:var(--muted)">地図を読み込めませんでした。インターネットにつながっているか確認して、ページを再読み込みしてください。</p>';
+    }
+  }
+  function showTab(name) {
+    if (name === 'spots') name = 'spots-honto';
+    if (TABS.indexOf(name) < 0) name = 'shiori';
+    var panel = name.indexOf('spots') === 0 ? 'spots' : name;
+    PANELS.forEach(function (p) { document.getElementById('panel-' + p).hidden = p !== panel; });
+    TABS.forEach(function (t) {
+      document.getElementById('tab-' + t).setAttribute('aria-selected', String(t === name));
+    });
+    if (panel === 'spots') {
+      document.getElementById('panel-spots').setAttribute('aria-labelledby', 'tab-' + name);
+      setIsland(name === 'spots-ishi' ? 'ishi' : 'honto');
+      if (!HAS_L) mapFallback('map');
+      else {
+        if (!mapReady) initMap();
+        setTimeout(function () { map.invalidateSize(); map.fitBounds(VIEWS[island]); }, 0);
+      }
+    }
+    if (name === 'course') {
+      measureHeader();
+      initCourse();
+      if (cmap) setTimeout(function () { cmap.invalidateSize(); selectDay(courseDay, false); }, 0);
+    }
+    measureHeader();
+    window.scrollTo(0, 0);
+  }
+  function goTab(name) {
+    showTab(name);
+    try { history.replaceState(null, '', '#' + name); } catch (e) { /* data: URL などでは無視 */ }
+  }
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.addEventListener('click', function () { goTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function (b) {
+    b.addEventListener('click', function () { goTab(b.dataset.goto); });
+  });
+  window.addEventListener('hashchange', function () { showTab(location.hash.slice(1)); });
+
+  function measureHeader() {
+    var h = document.querySelector('.app-header').offsetHeight;
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  window.addEventListener('resize', measureHeader);
+
+  /* ---------- フィルタ ---------- */
+  var filter = { area: 'all', pri: 'all', cat: 'all' };
+  function buildFilterRow(group, entries) {
+    var row = document.querySelector('.frow[data-group="' + group + '"]');
+    [['all', 'すべて']].concat(entries).forEach(function (e) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fchip'; b.id = 'f-' + group + '-' + e[0];
+      b.dataset.v = e[0]; b.textContent = e[1];
+      b.setAttribute('aria-pressed', String(e[0] === 'all'));
+      b.addEventListener('click', function () {
+        filter[group] = e[0];
+        row.querySelectorAll('.fchip').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        render();
+      });
+      row.appendChild(b);
+    });
+  }
+  buildFilterRow('area', Object.keys(AREAS).map(function (k) { return [k, AREAS[k].label]; }));
+  buildFilterRow('pri', Object.keys(PRI).map(function (k) { return [k, PRI[k]]; }));
+  var usedCats = Object.keys(CATS).filter(function (k) { return SPOTS.some(function (s) { return s.cat === k; }); });
+  buildFilterRow('cat', usedCats.map(function (k) { return [k, CATS[k]]; }).concat([['rain', '雨でもOK']]));
+
+  function setIsland(isl) {
+    if (isl === island && document.body.dataset.island) return;
+    island = isl;
+    document.body.dataset.island = isl;
+    // 島が変わったら絞り込みをリセットし、その島にないチップは隠す
+    ['area', 'pri', 'cat'].forEach(function (g) {
+      filter[g] = 'all';
+      document.querySelectorAll('.frow[data-group="' + g + '"] .fchip').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.v === 'all'));
+        var v = b.dataset.v;
+        var has = v === 'all' || SPOTS.some(function (s) {
+          if (s.isl !== isl) return false;
+          if (g === 'area') return s.area === v;
+          if (g === 'pri') return s.pri === v;
+          return v === 'rain' ? s.rain : s.cat === v;
+        });
+        b.hidden = !has;
+      });
+    });
+    // 石垣はエリアが1つなのでエリアの行ごと隠す
+    document.querySelector('.frow[data-group="area"]').hidden = isl === 'ishi';
+    document.querySelectorAll('.map-legend [data-isl]').forEach(function (el) { el.hidden = el.dataset.isl !== isl; });
+    activeId = null;
+    render();
+  }
+
+  function visibleSpots() {
+    return SPOTS.filter(function (s) {
+      return s.isl === island &&
+             (filter.area === 'all' || s.area === filter.area) &&
+             (filter.pri === 'all' || s.pri === filter.pri) &&
+             (filter.cat === 'all' || (filter.cat === 'rain' ? s.rain : s.cat === filter.cat));
+    });
+  }
+
+  /* ---------- 一覧 ---------- */
+  var listEl = document.getElementById('list');
+  var activeId = null;
+
+  function cardHTML(s) {
+    var thumb = s.img ? '<img src="' + esc(s.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '';
+    return '' +
+      '<div class="thumb">' + thumb +
+        '<div class="ph"' + (s.img ? ' hidden' : '') + '>' + esc(CATS[s.cat]) + '<br>写真なし</div>' +
+        '<span class="num">' + s.no + '</span></div>' +
+      '<div class="card-body">' +
+        '<div class="card-top">' +
+          '<span class="pri ' + s.pri + '">' + PRI[s.pri] + '</span>' +
+          '<span class="area">' + AREAS[s.area].label + '</span>' +
+          '<span class="cat">' + CATS[s.cat] + '</span>' +
+          (s.rain ? '<span class="rain">雨OK</span>' : '') +
+          (s.rsv ? '<span class="rsv">要予約</span>' : '') +
+        '</div>' +
+        '<div class="card-name">' + esc(s.name) + '</div>' +
+        '<div class="card-loc">' + esc(s.loc) + (s.approx ? '（ピン位置はおおよそ）' : '') + '</div>' +
+        '<p class="card-note">' + esc(s.note) + '</p>' +
+        '<div class="card-links">' +
+          '<a href="' + gmSearch(s.q) + '" target="_blank" rel="noopener">Googleマップで見る ↗</a>' +
+          '<a href="' + gmDir(s.q) + '" target="_blank" rel="noopener">ルート ↗</a>' +
+          (s.link ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener">お店・施設のページ ↗</a>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  function render() {
+    var vis = visibleSpots();
+    var islTotal = SPOTS.filter(function (s) { return s.isl === island; }).length;
+    document.getElementById('count').textContent = (island === 'ishi' ? '石垣・竹富 ' : '沖縄本島 ') + vis.length + ' / ' + islTotal + ' 件';
+    listEl.innerHTML = '';
+    if (!vis.length) { listEl.innerHTML = '<p class="empty">条件に合うスポットがありません。絞り込みを「すべて」に戻してください。</p>'; }
+    ['must', 'want', 'low'].forEach(function (p) {
+      var items = vis.filter(function (s) { return s.pri === p; });
+      if (!items.length) return;
+      var h = document.createElement('div');
+      h.className = 'group-h ' + p;
+      h.innerHTML = PRI[p] + ' <span class="mono">' + items.length + '</span>';
+      listEl.appendChild(h);
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:grid;gap:10px;margin-bottom:8px';
+      items.forEach(function (s) {
+        var el = document.createElement('article');
+        el.className = 'card ' + s.pri + (s.id === activeId ? ' is-active' : '');
+        el.id = 'spot-' + s.id;
+        el.tabIndex = 0;
+        el.style.setProperty('--c', 'var(--a-' + AREAS[s.area].css + ')');
+        el.style.setProperty('--c-soft', 'var(--a-' + AREAS[s.area].css + '-soft)');
+        el.innerHTML = cardHTML(s);
+        var img = el.querySelector('img');
+        if (img) img.addEventListener('error', function () { img.remove(); el.querySelector('.ph').hidden = false; });
+        el.addEventListener('click', function (ev) {
+          if (ev.target.closest('a')) return;
+          select(s.id, 'list');
+        });
+        el.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(s.id, 'list'); }
+        });
+        wrap.appendChild(el);
+      });
+      listEl.appendChild(wrap);
+    });
+    if (mapReady) syncMarkers(vis);
+  }
+
+  /* ---------- 地図 ---------- */
+  var map, markers = {};
+  var VIEWS = HAS_L ? {
+    honto: L.latLngBounds([26.10, 127.62], [26.72, 127.98]),
+    ishi:  L.latLngBounds([24.30, 124.05], [24.47, 124.27])
+  } : {};
+
+  function pinIcon(s, active) {
+    return L.divIcon({
+      className: 'pin ' + s.pri + (active ? ' is-active' : ''),
+      html: '<span style="--c:' + cssVar('--a-' + AREAS[s.area].css) + '">' + s.no + '</span>',
+      iconSize: s.pri === 'must' ? [32, 32] : [26, 26],
+      iconAnchor: s.pri === 'must' ? [16, 16] : [13, 13],
+      popupAnchor: [0, -14]
+    });
+  }
+
+  function initMap() {
+    mapReady = true;
+    map = L.map('map', { zoomControl: true, attributionControl: true });
+    // 国土地理院の淡色地図（APIキー不要・日本語表記）
+    L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      maxZoom: 18, minZoom: 5,
+      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>'
+    }).addTo(map);
+    map.fitBounds(VIEWS.honto);
+
+    BASES.forEach(function (b) {
+      L.marker([b.lat, b.lng], {
+        icon: L.divIcon({ className: 'base-pin', html: '<span>' + b.label + '</span>', iconSize: [24, 24], iconAnchor: [12, 12] }),
+        zIndexOffset: -500, keyboard: false
+      }).addTo(map).bindPopup('<b>' + esc(b.name) + '</b><br><a href="' + gmSearch(b.q) + '" target="_blank" rel="noopener">Googleマップで見る ↗</a>');
+    });
+
+    SPOTS.forEach(function (s) {
+      var m = L.marker([s.lat, s.lng], { icon: pinIcon(s, false), riseOnHover: true, title: s.name });
+      m.bindPopup('<b>' + s.no + '. ' + esc(s.name) + '</b><br>' + PRI[s.pri] + '・' + AREAS[s.area].label +
+        '<br><a href="' + gmSearch(s.q) + '" target="_blank" rel="noopener">Googleマップで見る ↗</a>');
+      m.on('click', function () { select(s.id, 'map'); });
+      markers[s.id] = m;
+    });
+
+    document.querySelectorAll('.map-tools button').forEach(function (b) {
+      b.addEventListener('click', function () { setView(b.dataset.view, true); });
+    });
+    syncMarkers(visibleSpots());
+  }
+
+  function setView(v, fly) {
+    document.querySelectorAll('.map-tools button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.view === v)); });
+    if (fly) map.flyToBounds(VIEWS[v], { duration: 0.8 });
+  }
+
+  function syncMarkers(vis) {
+    var ids = vis.map(function (s) { return s.id; });
+    SPOTS.forEach(function (s) {
+      var m = markers[s.id];
+      if (ids.indexOf(s.id) >= 0) { if (!map.hasLayer(m)) m.addTo(map); }
+      else if (map.hasLayer(m)) map.removeLayer(m);
+    });
+  }
+
+  function select(id, from) {
+    var prev = activeId;
+    activeId = id;
+    var s = SPOTS[id - 1];
+    document.querySelectorAll('.card.is-active').forEach(function (c) { c.classList.remove('is-active'); });
+    var card = document.getElementById('spot-' + id);
+    if (card) card.classList.add('is-active');
+    if (mapReady) {
+      if (prev && markers[prev]) { markers[prev].setIcon(pinIcon(SPOTS[prev - 1], false)); markers[prev].setZIndexOffset(0); }
+      var m = markers[id];
+      m.setIcon(pinIcon(s, true)); m.setZIndexOffset(1000);
+      setView(s.area === 'ishi' ? 'ishi' : 'honto', false);
+      if (from === 'list') {
+        map.flyTo([s.lat, s.lng], Math.max(map.getZoom(), s.area === 'ishi' ? 12 : 11), { duration: 0.6 });
+        m.openPopup();
+      }
+    }
+    if (from === 'map' && card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ---------- KML 書き出し（Googleマイマップ用） ---------- */
+  document.getElementById('export-kml').addEventListener('click', function () {
+    var vis = visibleSpots();
+    var x = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    var kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>沖縄・石垣旅行 2026</name>\n' +
+      vis.map(function (s) {
+        return '<Placemark><name>' + x(s.no + '. ' + s.name) + '</name><description>' +
+          x(PRI[s.pri] + ' / ' + AREAS[s.area].label + ' / ' + CATS[s.cat] + ' — ' + s.note) +
+          '</description><Point><coordinates>' + s.lng + ',' + s.lat + ',0</coordinates></Point></Placemark>';
+      }).join('\n') + '\n</Document></kml>';
+    var url = URL.createObjectURL(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = 'okinawa-spots.kml';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  /* ---------- モデルコース ---------- */
+  // 地点： [表示名, 緯度, 経度, Googleマップ検索語, エリア]
+  var P = {
+    naha_ap:   ['那覇空港（レンタカー）', 26.1958, 127.6459, 'トヨタレンタカー 那覇空港店', 'south'],
+    purari:    ['Purari（宿）', 26.3215, 127.8090, '沖縄県沖縄市比屋根7-20-1', 'central'],
+    jef:       ['JEF 豊見城店', 26.1617, 127.6640, 'JEF 豊見城店', 'south'],
+    katsuren:  ['勝連城跡', 26.3302, 127.8789, '勝連城跡', 'central'],
+    ayahashi:  ['海中道路（海の駅あやはし館）', 26.3228, 127.9047, '海の駅あやはし館', 'central'],
+    yachimun:  ['やちむんの里', 26.4045, 127.7450, 'やちむんの里 読谷村', 'central'],
+    amevi:     ['アメリカンビレッジ', 26.3162, 127.7567, '美浜アメリカンビレッジ', 'central'],
+    zhyvago:   ['ZHYVAGO COFFEE', 26.3150, 127.7535, 'ZHYVAGO COFFEE WORKS OKINAWA', 'central'],
+    beefys:    ['ビーフィーズ（夕食）', 26.3110, 127.7550, 'シーサイド ステーキ ビーフィーズ 北谷', 'central'],
+    aw:        ['A&W 美浜店（夕食）', 26.3085, 127.7605, 'A&W 美浜店', 'central'],
+    gangala:   ['ガンガラーの谷', 26.1405, 127.7488, 'ガンガラーの谷', 'south'],
+    okiworld:  ['沖縄ワールド・玉泉洞', 26.1386, 127.7514, 'おきなわワールド', 'south'],
+    domu:      ['土夢 ごはんカフェ（昼食）', 26.1530, 127.6720, '土夢 ごはんカフェ 西崎店', 'south'],
+    shuri:     ['首里城', 26.2170, 127.7195, '首里城公園', 'south'],
+    ishidatami:['金城町石畳道', 26.2141, 127.7173, '首里金城町石畳道', 'south'],
+    kokusai:   ['国際通り', 26.2150, 127.6860, '国際通り 那覇', 'south'],
+    paikaji:   ['ぱいかじ 国際通り店（夕食）', 26.2155, 127.6820, '沖縄の台所 ぱいかじ 国際通り店', 'south'],
+    churaumi:  ['美ら海水族館', 26.6947, 127.8778, '沖縄美ら海水族館', 'north'],
+    bunkakan:  ['海洋文化館', 26.6870, 127.8782, '海洋博公園 海洋文化館', 'north'],
+    nakijin:   ['今帰仁城跡', 26.6908, 127.9298, '今帰仁城跡', 'north'],
+    ufuya:     ['百年古家 大家（昼食）', 26.6110, 128.0020, '百年古家 大家', 'north'],
+    cave_oki:  ['ケイブ沖縄', 26.4290, 127.8250, 'CAVE OKINAWA ケイブ沖縄', 'central'],
+    isg_ap:    ['石垣空港（レンタカー）', 24.3964, 124.2450, '石垣空港', 'ishi'],
+    porto:     ['Porto 石垣島（宿）', 24.3405, 124.1605, 'The BREAKFAST HOTEL PORTO 石垣島', 'ishi'],
+    port:      ['石垣港離島ターミナル', 24.3377, 124.1556, '石垣港離島ターミナル', 'ishi'],
+    taketomi:  ['竹富島', 24.3285, 124.0875, '竹富島', 'ishi'],
+    hitoshi:   ['ひとし（夕食・要予約）', 24.3410, 124.1590, 'ひとし 本店 石垣', 'ishi'],
+    isg_cave:  ['石垣島鍾乳洞', 24.3560, 124.1700, '石垣島鍾乳洞', 'ishi'],
+    museum:    ['八重山博物館', 24.3381, 124.1596, '石垣市立八重山博物館', 'ishi'],
+    ichiba:    ['公設市場・ユーグレナモール', 24.3395, 124.1580, '石垣市公設市場', 'ishi'],
+    kuniyoshi: ['宮良殿内・国吉家のガジュマル', 24.3420, 124.1570, '宮良殿内', 'ishi'],
+    yaimamura: ['石垣やいま村', 24.4043, 124.1444, '石垣やいま村', 'ishi'],
+    banna:     ['バンナ公園 展望台', 24.3785, 124.1745, 'バンナ公園 エメラルドの海を見る展望台', 'ishi'],
+    kabira:    ['川平湾', 24.4514, 124.1444, '川平公園 展望台', 'ishi'],
+    kaboo:     ['石垣牛ケバブ Kaboo（昼食）', 24.4525, 124.1455, '石垣牛ケバブ Kaboo', 'ishi'],
+    yonehara:  ['米原のヤエヤマヤシ群落', 24.4500, 124.1920, '米原のヤエヤマヤシ群落', 'ishi'],
+    tamatori:  ['玉取崎展望台', 24.4995, 124.2820, '玉取崎展望台', 'ishi'],
+    hirakubo:  ['平久保崎灯台', 24.6066, 124.3168, '平久保埼灯台', 'ishi'],
+    shiraho:   ['白保の海', 24.3640, 124.2470, '白保海岸', 'ishi']
+  };
+
+  // 本島の3日間（A・B共通）
+  var HONTO = [
+    { date: '11/22', w: '日・本島', wx: 'sun', wxl: '晴れ', title: '中部（勝連城跡・海中道路・やちむんの里・北谷の夕日）',
+      why: '首里城が休園の日。晴れを活かして景色のいい中部を回ります。宿に一度荷物を置いてから北谷へ出ると夜が楽です。',
+      stops: [
+        { t: '10:15', p: 'naha_ap', l: 'レンタカーで出発', fixed: 1 },
+        { t: '10:30', p: 'jef', l: 'JEF でぬーやるバーガー（軽めの昼食）' },
+        { move: '高速経由で約1時間' },
+        { t: '12:00', p: 'katsuren', l: '勝連城跡（城壁の上から海を一望）' },
+        { t: '13:00', p: 'ayahashi', l: '海中道路をドライブ（海の上を走る一本道）' },
+        { move: '車で約1時間' },
+        { t: '14:15', p: 'yachimun', l: 'やちむんの里（ギャラリーと登り窯を見て回る）' },
+        { move: '車で約40分' },
+        { t: '16:00', p: 'purari', l: 'Purari チェックイン・荷物を置く', fixed: 1, sub: '予約メモは18:00。宿の案内では15:00から受付' },
+        { t: '16:45', p: 'zhyvago', l: 'アメリカンビレッジを散歩、ZHYVAGOでコーヒー。17:38ごろ夕日' },
+        { t: '18:15', p: 'beefys', l: '夕食：ビーフィーズ（海沿いのステーキ）', sub: '代わりに A&W 美浜店で手軽に済ませても' },
+        { t: '20:00', p: 'purari', l: '宿へ（約20分）' }
+      ] },
+    { date: '11/23', w: '月祝・本島', wx: 'sun', wxl: '晴れ', title: '南部の自然と首里城、夜は国際通り',
+      why: '首里城の有料区域は12:00から。公開初日なので、混雑のピークを外して15時ごろに入ります。夜は那覇で島唄ライブ。',
+      stops: [
+        { t: '08:50', p: 'purari', l: '宿を出発（約50分）' },
+        { t: '10:00', p: 'gangala', l: 'ガンガラーの谷 ガイドツアー', tag: '要予約', sub: '約80〜90分' },
+        { t: '11:40', p: 'okiworld', l: '沖縄ワールド・玉泉洞', tag: '屋内' },
+        { t: '13:00', p: 'domu', l: '昼食：土夢 ごはんカフェ（糸満・約20分）' },
+        { move: '車で約30分' },
+        { t: '14:45', p: 'shuri', l: '首里城（正殿は外観と見学デッキから）', sub: '公開初日で混雑の見込み。周辺の駐車場は早めに確保' },
+        { t: '16:15', p: 'ishidatami', l: '金城町石畳道を下って散歩（途中に首里殿内）' },
+        { move: '車で約15分' },
+        { t: '17:15', p: 'kokusai', l: '国際通りを散歩' },
+        { t: '18:30', p: 'paikaji', l: '夕食：ぱいかじ（19:30から民謡ライブ）', sub: 'とぅばらーま（国際通り・島唄ライブ）も同じエリア。運転する人はお酒なし' },
+        { t: '21:00', p: 'purari', l: '宿へ（約40分）' }
+      ] },
+    { date: '11/24', w: '火・本島', wx: 'wet', wxl: '雨', title: '北部・屋内中心（美ら海・大家・ケイブ沖縄）',
+      why: '雨の日は屋内の水族館と鍾乳洞へ。昼は名護の古民家「大家」でアグー料理。雨が弱ければ今帰仁城跡にも寄れます。',
+      stops: [
+        { t: '09:00', p: 'purari', l: '宿を出発（高速経由で約1時間20分）' },
+        { t: '10:30', p: 'churaumi', l: '美ら海水族館', tag: '屋内', sub: '入館は17:30まで' },
+        { t: '12:45', p: 'bunkakan', l: '海洋文化館（同じ公園内）', tag: '屋内' },
+        { t: '13:30', p: 'nakijin', l: '雨が弱ければ 今帰仁城跡（約15分）', open: 1 },
+        { move: '車で約30分' },
+        { t: '14:30', p: 'ufuya', l: '昼食：百年古家 大家（昼のLOは15:30）' },
+        { move: '車で約40分' },
+        { t: '16:15', p: 'cave_oki', l: 'ケイブ沖縄', tag: '屋内', sub: '営業時間は要確認' },
+        { t: '17:30', p: 'purari', l: '宿へ（約25分）。翌朝7:00出発なので早めに休む' }
+      ] }
+  ];
+
+  var COURSES = {
+    A: {
+      sum: '本島は晴れの22・23日に屋外、雨の24日に美ら海と鍾乳洞。首里城は公開初日の23日午後。石垣は雨の26日を避け、竹富島を25日の午後に前倒しします。26日は市街の屋内スポットを歩いて回る日です。',
+      days: HONTO.concat([
+        { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、午後は竹富島',
+          why: '雨が降り出す夜より前に竹富島を済ませます。島は半日あれば一通り回れます。夜は人気店「ひとし」（要予約）。',
+          stops: [
+            { t: '07:00', p: 'purari', l: '宿を出発（朝の渋滞を見込んで早めに）' },
+            { t: '08:00', p: 'naha_ap', l: 'レンタカー返却 → 送迎バスで空港', fixed: 1 },
+            { t: '09:40', l: '那覇発 → 10:45 石垣着', fixed: 1 },
+            { t: '11:00', p: 'isg_ap', l: 'レンタカー受け取り', fixed: 1 },
+            { move: '石垣市街まで約30分' },
+            { t: '11:45', p: 'porto', l: 'ホテルに荷物を預けて、港の近くで昼食' },
+            { t: '12:45', p: 'port', l: '高速船で竹富島へ（約15分・15分おき）' },
+            { t: '13:00', p: 'taketomi', l: '竹富島をレンタサイクルや水牛車で回る' },
+            { t: '16:30', p: 'port', l: '石垣港へ戻る' },
+            { t: '17:00', p: 'porto', l: 'チェックイン', fixed: 1 },
+            { t: '18:30', p: 'hitoshi', l: '夕食：ひとし（海鮮居酒屋）', tag: '要予約' }
+          ] },
+        { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '雨の日の市街めぐり（ほぼ徒歩圏）',
+          why: '博物館・市場・屋敷はホテルから歩ける範囲にまとまっています。午後に雨が弱まれば、車でやいま村やバンナ公園へ。',
+          stops: [
+            { t: '10:00', p: 'isg_cave', l: '石垣島鍾乳洞（車で約10分）', tag: '屋内', sub: '見学は約30分' },
+            { t: '11:00', p: 'museum', l: '八重山博物館', tag: '屋内' },
+            { t: '12:00', p: 'ichiba', l: '公設市場・ユーグレナモールで昼食と買い物', tag: '屋根あり' },
+            { t: '13:30', p: 'kuniyoshi', l: '宮良殿内と国吉家のガジュマル巨木', sub: '濡れたガジュマルの気根は雨の日のほうが迫力あり' },
+            { t: '14:45', p: 'yaimamura', l: '小雨なら 石垣やいま村（リスザル・古民家）', open: 1 },
+            { t: '16:30', p: 'banna', l: '雨が上がれば バンナ公園の展望台', open: 1 },
+            { t: '17:30', p: 'porto', l: 'ホテルへ' }
+          ] },
+        { date: '11/27', w: '金・石垣', wx: 'cloud', wxl: 'くもり', title: '川平湾と北部ドライブ',
+          why: '昼前後に川平湾に着くので、日が差せば一番きれいな色が見られます。北の平久保崎まで行くかは時間を見て決めます。',
+          stops: [
+            { t: '11:00', p: 'porto', l: 'チェックアウト', fixed: 1 },
+            { move: '車で約30分' },
+            { t: '11:40', p: 'kabira', l: '川平湾（展望台・浜を散歩、海が穏やかならグラスボート）' },
+            { t: '12:45', p: 'kaboo', l: '昼食：石垣牛ケバブ Kaboo' },
+            { t: '13:30', p: 'yonehara', l: '米原のヤシ林を少し散策' },
+            { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
+            { t: '15:15', p: 'hirakubo', l: '時間があれば 平久保崎灯台（往復約1時間）', open: 1 },
+            { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発（19:10の可能性あり）', fixed: 1 }
+          ] }
+      ])
+    },
+    B: {
+      sum: '本島はAと同じ。石垣は竹富島を当初どおり26日にする案です（雨の中になる可能性が高い）。25日は川平湾と北部、27日は市街の屋内スポットに回します。',
+      days: HONTO.concat([
+        { date: '11/25', w: '水・石垣', wx: 'cloud', wxl: 'くもり', title: '移動して、川平湾と北部ドライブ',
+          why: '空港から川平湾へ直行すると、昼前後のいい時間に着けます。',
+          stops: [
+            { t: '07:00', p: 'purari', l: '宿を出発' },
+            { t: '08:00', p: 'naha_ap', l: 'レンタカー返却 → 9:40 那覇発', fixed: 1 },
+            { t: '11:00', p: 'isg_ap', l: '石垣でレンタカー受け取り', fixed: 1 },
+            { move: '車で約40分' },
+            { t: '11:45', p: 'kabira', l: '川平湾' },
+            { t: '12:45', p: 'kaboo', l: '昼食：石垣牛ケバブ Kaboo' },
+            { t: '13:30', p: 'yonehara', l: '米原のヤシ林' },
+            { t: '14:30', p: 'tamatori', l: '玉取崎展望台' },
+            { t: '17:00', p: 'porto', l: 'チェックイン', fixed: 1 },
+            { t: '18:30', p: 'hitoshi', l: '夕食：ひとし', tag: '要予約' }
+          ] },
+        { date: '11/26', w: '木・石垣', wx: 'wet', wxl: '雨', title: '竹富島（雨具必須）',
+          why: '雨だとレンタサイクルはつらいので、屋根のある水牛車を中心に。強風で船が欠航したら27日の午前に回します。',
+          stops: [
+            { t: '09:30', p: 'port', l: '高速船で竹富島へ' },
+            { t: '09:45', p: 'taketomi', l: '水牛車・集落散歩' },
+            { t: '14:00', p: 'port', l: '石垣港へ戻る' },
+            { t: '14:30', p: 'museum', l: '八重山博物館', tag: '屋内' },
+            { t: '15:30', p: 'ichiba', l: '公設市場・ユーグレナモール', tag: '屋根あり' }
+          ] },
+        { date: '11/27', w: '金・石垣', wx: 'cloud', wxl: 'くもり', title: '鍾乳洞・市街・白保',
+          why: '最終日は空港の近くでゆっくり。返却は17:30ごろが目安です。',
+          stops: [
+            { t: '11:00', p: 'porto', l: 'チェックアウト', fixed: 1 },
+            { t: '11:20', p: 'isg_cave', l: '石垣島鍾乳洞', tag: '屋内' },
+            { t: '12:30', p: 'kuniyoshi', l: '宮良殿内と国吉家のガジュマル巨木' },
+            { t: '14:00', p: 'banna', l: 'バンナ公園の展望台' },
+            { t: '15:30', p: 'shiraho', l: '白保の海と集落（空港から約10分）' },
+            { t: '17:30', p: 'isg_ap', l: 'レンタカー返却 → 19:20 石垣発', fixed: 1 }
+          ] }
+      ])
+    }
+  };
+
+  var courseKey = 'A', courseDay = 0, cmap = null, cLayer = null;
+
+  function stopNums(day) {
+    // 同じ地点に続けて戻るときも、通る順に番号を振る
+    var n = 0;
+    return day.stops.map(function (s) { return s.p ? ++n : null; });
+  }
+
+  function gmRoute(day) {
+    var pts = [];
+    var onIshi = day.w.indexOf('石垣') >= 0;
+    day.stops.forEach(function (s) {
+      if (s.p && (P[s.p][4] === 'ishi') === onIshi && pts[pts.length - 1] !== s.p) pts.push(s.p);
+    });
+    if (pts.length < 2) return gmSearch(P[pts[0]][3]);
+    var q = function (k) { return encodeURIComponent(P[k][3]); };
+    var url = 'https://www.google.com/maps/dir/?api=1&origin=' + q(pts[0]) + '&destination=' + q(pts[pts.length - 1]);
+    var mid = pts.slice(1, -1);
+    if (mid.length) url += '&waypoints=' + mid.map(q).join('%7C');
+    return url;
+  }
+
+  function renderCourse() {
+    var c = COURSES[courseKey];
+    document.getElementById('course-sum').textContent = c.sum;
+    document.querySelectorAll('.course-switch button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.course === courseKey));
+    });
+    var box = document.getElementById('course-days');
+    box.innerHTML = '';
+    c.days.forEach(function (d, i) {
+      var nums = stopNums(d);
+      var el = document.createElement('article');
+      el.className = 'cday' + (i === courseDay ? ' is-active' : '') + (d.w.indexOf('石垣') >= 0 ? ' ishi' : '');
+      el.id = 'cday-' + i;
+      el.tabIndex = 0;
+      var tl = d.stops.map(function (s, j) {
+        if (s.move) return '<li class="move"><span class="t"></span><span class="rail"></span><span class="what">' + esc(s.move) + '</span></li>';
+        var cls = s.fixed ? 'fixed' : (s.open ? 'open' : '');
+        var num = nums[j] ? '<span class="snum">' + nums[j] + '</span>' : '';
+        var tag = s.tag ? '<span class="chip-s ' + (s.tag === '要予約' ? 'rsv' : 'in') + '">' + esc(s.tag) + '</span>' : '';
+        var sub = s.sub ? '<small>' + esc(s.sub) + '</small>' : '';
+        return '<li class="' + cls + '"><span class="t">' + esc(s.t || '') + '</span><span class="rail"></span><span class="what">' + num + esc(s.l) + tag + sub + '</span></li>';
+      }).join('');
+      el.innerHTML =
+        '<div class="cday-h"><span class="d">' + d.date + '</span><span class="w">' + esc(d.w) + '</span><span class="wx ' + d.wx + '">' + d.wxl + '</span></div>' +
+        '<div class="cday-main"><div class="cday-title">' + esc(d.title) + '</div><ul class="tl">' + tl + '</ul>' +
+        '<p class="cday-why">' + esc(d.why) + '</p>' +
+        '<div class="card-links"><a href="' + gmRoute(d) + '" target="_blank" rel="noopener">Googleマップでルートを開く ↗</a></div></div>';
+      el.addEventListener('click', function (ev) {
+        if (ev.target.closest('a')) return;
+        selectDay(i, false);
+      });
+      el.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectDay(i, false); }
+      });
+      box.appendChild(el);
+    });
+    selectDay(Math.min(courseDay, c.days.length - 1), false);
+    observeDays();
+  }
+
+  var courseInited = false;
+  function initCourse() {
+    if (courseInited) return;
+    courseInited = true;
+    document.querySelectorAll('.course-switch button').forEach(function (b) {
+      b.addEventListener('click', function () { courseKey = b.dataset.course; courseDay = 0; renderCourse(); });
+    });
+    if (HAS_L) initCourseMap(); else mapFallback('course-map');
+    renderCourse();
+  }
+
+  function initCourseMap() {
+    cmap = L.map('course-map', { zoomControl: true });
+    L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      maxZoom: 18, minZoom: 5,
+      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>'
+    }).addTo(cmap);
+    cmap.setView([26.40, 127.80], 9);
+    cLayer = L.layerGroup().addTo(cmap);
+  }
+
+  function selectDay(i, fromScroll) {
+    courseDay = i;
+    var d = COURSES[courseKey].days[i];
+    document.querySelectorAll('.cday').forEach(function (el, k) { el.classList.toggle('is-active', k === i); });
+    if (!cmap) return;
+    cLayer.clearLayers();
+    var nums = stopNums(d);
+    var line = [];
+    var color = cssVar(d.w.indexOf('石垣') >= 0 ? '--a-ishi' : '--tile');
+    var onIshi = d.w.indexOf('石垣') >= 0;
+    d.stops.forEach(function (s, j) {
+      if (!s.p) return;
+      var pt = P[s.p];
+      if ((pt[4] === 'ishi') !== onIshi) return;   // 移動日は到着した島の分だけ地図に出す
+      line.push([pt[1], pt[2]]);
+      L.marker([pt[1], pt[2]], {
+        icon: L.divIcon({ className: 'pin', html: '<span style="--c:' + color + '">' + nums[j] + '</span>', iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -12] }),
+        zIndexOffset: 100 - nums[j]
+      }).addTo(cLayer).bindPopup('<b>' + nums[j] + '. ' + esc(pt[0]) + '</b><br>' + esc((s.t ? s.t + ' ' : '') + s.l));
+    });
+    if (line.length > 1) {
+      L.polyline(line, { color: color, weight: 3, opacity: .8, dashArray: '6 6' }).addTo(cLayer);
+    }
+    var head = document.getElementById('course-map-head');
+    head.innerHTML = '<b>' + courseKey + '・' + d.date + '</b> ' + esc(d.title);
+    if (line.length) cmap.flyToBounds(L.latLngBounds(line).pad(0.25), { duration: 0.6, maxZoom: 13 });
+  }
+
+  var dayObserver = null;
+  function observeDays() {
+    if (dayObserver) dayObserver.disconnect();
+    if (!('IntersectionObserver' in window)) return;
+    dayObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = Number(e.target.id.replace('cday-', ''));
+        if (i !== courseDay) selectDay(i, true);
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    document.querySelectorAll('.cday').forEach(function (el) { dayObserver.observe(el); });
+  }
+
+  /* ---------- 起動 ---------- */
+  render();
+  showTab(location.hash.slice(1) || 'shiori');
+})();
+</script>
+</body>
+</html>
