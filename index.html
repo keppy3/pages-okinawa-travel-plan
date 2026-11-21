@@ -272,6 +272,16 @@ td.nowrap { white-space: nowrap; }
 .list-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; color: var(--muted); }
 .list-tools button { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: .8rem; }
 
+.kind-switch { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.kind-switch button:first-child { border-radius: 9px 0 0 9px; }
+.kind-switch button:last-child { border-radius: 0 9px 9px 0; }
+.kind-switch button {
+  border: none; background: none; padding: 9px 10px; font-size: .92rem; font-weight: 700; color: var(--muted); cursor: pointer;
+  display: flex; justify-content: center; align-items: baseline; gap: 6px;
+}
+.kind-switch button + button { border-left: 1px solid var(--line); }
+.kind-switch button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.kind-switch .kc { font-size: .75rem; font-weight: 500; opacity: .8; }
 .group-h { font-size: .8rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: baseline; }
 .group-h.must { color: var(--tile); }
 .card {
@@ -644,6 +654,10 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     </div>
 
     <div class="list-pane" id="list-pane">
+      <div class="kind-switch" role="group" aria-label="表示する種類">
+        <button type="button" id="kind-sight" data-kind="sight" aria-pressed="true">観光スポット <span class="kc mono"></span></button>
+        <button type="button" id="kind-food" data-kind="food" aria-pressed="false">レストラン・カフェ <span class="kc mono"></span></button>
+      </div>
       <div class="filters">
         <div class="frow" data-group="area"><span class="fl">エリア</span></div>
         <div class="frow" data-group="pri"><span class="fl">優先度</span></div>
@@ -761,7 +775,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     south:   { label: '那覇・南部', css: 'south' },
     ishi:    { label: '石垣・竹富', css: 'ishi' }
   };
-  var PRI = { must: 'Must go', want: '気になる', low: '優先度低' };
+  var PRI = { must: '高', want: '中', low: '低' };
   var CATS = {
     aqua:   '水族館・博物館',
     castle: '城・史跡',
@@ -984,14 +998,16 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
       note: '石垣牛のケバブ。川平湾を見たあとの軽い昼食に。' }
   ];
   SPOTS.forEach(function (s, i) { s.id = i + 1; });
-  // 表示用の番号は島ごとに 1 から振る（本島・石垣それぞれのタブで連番になるように）
+  // 表示用の番号は「島 × 観光/レストラン」ごとに 1 から振る
   (function () {
-    var n = { honto: 0, ishi: 0 };
+    var n = {};
     ['must', 'want', 'low'].forEach(function (p) {
       SPOTS.forEach(function (s) {
         if (s.pri !== p) return;
         s.isl = s.area === 'ishi' ? 'ishi' : 'honto';
-        s.no = ++n[s.isl];
+        s.kind = s.cat === 'food' ? 'food' : 'sight';
+        var k = s.isl + '-' + s.kind;
+        s.no = n[k] = (n[k] || 0) + 1;
       });
     });
   })();
@@ -1083,22 +1099,43 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     });
   }
   buildFilterRow('area', Object.keys(AREAS).map(function (k) { return [k, AREAS[k].label]; }));
-  buildFilterRow('pri', Object.keys(PRI).map(function (k) { return [k, PRI[k]]; }));
-  var usedCats = Object.keys(CATS).filter(function (k) { return SPOTS.some(function (s) { return s.cat === k; }); });
+  buildFilterRow('pri', Object.keys(PRI).map(function (k) { return [k, '優先度 ' + PRI[k]]; }));
+  var usedCats = Object.keys(CATS).filter(function (k) { return k !== 'food' && SPOTS.some(function (s) { return s.cat === k; }); });
   buildFilterRow('cat', usedCats.map(function (k) { return [k, CATS[k]]; }).concat([['rain', '雨でもOK']]));
+
+  var kind = 'sight';   // 'sight' = 観光スポット / 'food' = レストラン・カフェ
+  document.querySelectorAll('.kind-switch button').forEach(function (b) {
+    b.addEventListener('click', function () { setKind(b.dataset.kind); });
+  });
 
   function setIsland(isl) {
     if (isl === island && document.body.dataset.island) return;
     island = isl;
     document.body.dataset.island = isl;
-    // 島が変わったら絞り込みをリセットし、その島にないチップは隠す
+    document.querySelectorAll('.map-legend [data-isl]').forEach(function (el) { el.hidden = el.dataset.isl !== isl; });
+    resetFilters();
+  }
+
+  function setKind(k) {
+    if (k === kind) return;
+    kind = k;
+    resetFilters();
+  }
+
+  // 島や種類が変わったら絞り込みをリセットし、該当がないチップは隠す
+  function resetFilters() {
+    document.querySelectorAll('.kind-switch button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
+      var n = SPOTS.filter(function (s) { return s.isl === island && s.kind === b.dataset.kind; }).length;
+      b.querySelector('.kc').textContent = n;
+    });
     ['area', 'pri', 'cat'].forEach(function (g) {
       filter[g] = 'all';
       document.querySelectorAll('.frow[data-group="' + g + '"] .fchip').forEach(function (b) {
         b.setAttribute('aria-pressed', String(b.dataset.v === 'all'));
         var v = b.dataset.v;
         var has = v === 'all' || SPOTS.some(function (s) {
-          if (s.isl !== isl) return false;
+          if (s.isl !== island || s.kind !== kind) return false;
           if (g === 'area') return s.area === v;
           if (g === 'pri') return s.pri === v;
           return v === 'rain' ? s.rain : s.cat === v;
@@ -1106,16 +1143,16 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         b.hidden = !has;
       });
     });
-    // 石垣はエリアが1つなのでエリアの行ごと隠す
-    document.querySelector('.frow[data-group="area"]').hidden = isl === 'ishi';
-    document.querySelectorAll('.map-legend [data-isl]').forEach(function (el) { el.hidden = el.dataset.isl !== isl; });
+    // 石垣はエリアが1つなのでエリアの行ごと隠す。レストランにはカテゴリの行を出さない
+    document.querySelector('.frow[data-group="area"]').hidden = island === 'ishi';
+    document.querySelector('.frow[data-group="cat"]').hidden = kind === 'food';
     activeId = null;
     render();
   }
 
   function visibleSpots() {
     return SPOTS.filter(function (s) {
-      return s.isl === island &&
+      return s.isl === island && s.kind === kind &&
              (filter.area === 'all' || s.area === filter.area) &&
              (filter.pri === 'all' || s.pri === filter.pri) &&
              (filter.cat === 'all' || (filter.cat === 'rain' ? s.rain : s.cat === filter.cat));
@@ -1134,9 +1171,9 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
         '<span class="num">' + s.no + '</span></div>' +
       '<div class="card-body">' +
         '<div class="card-top">' +
-          '<span class="pri ' + s.pri + '">' + PRI[s.pri] + '</span>' +
+          '<span class="pri ' + s.pri + '">優先度 ' + PRI[s.pri] + '</span>' +
           '<span class="area">' + AREAS[s.area].label + '</span>' +
-          '<span class="cat">' + CATS[s.cat] + '</span>' +
+          (s.kind === 'sight' ? '<span class="cat">' + CATS[s.cat] + '</span>' : '') +
           (s.rain ? '<span class="rain">雨OK</span>' : '') +
           (s.rsv ? '<span class="rsv">要予約</span>' : '') +
         '</div>' +
@@ -1153,16 +1190,17 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
 
   function render() {
     var vis = visibleSpots();
-    var islTotal = SPOTS.filter(function (s) { return s.isl === island; }).length;
-    document.getElementById('count').textContent = (island === 'ishi' ? '石垣・竹富 ' : '沖縄本島 ') + vis.length + ' / ' + islTotal + ' 件';
+    var total = SPOTS.filter(function (s) { return s.isl === island && s.kind === kind; }).length;
+    var kindLabel = kind === 'food' ? 'レストラン・カフェ' : '観光スポット';
+    document.getElementById('count').textContent = (island === 'ishi' ? '石垣・竹富の' : '沖縄本島の') + kindLabel + ' ' + vis.length + ' / ' + total + ' 件';
     listEl.innerHTML = '';
-    if (!vis.length) { listEl.innerHTML = '<p class="empty">条件に合うスポットがありません。絞り込みを「すべて」に戻してください。</p>'; }
+    if (!vis.length) { listEl.innerHTML = '<p class="empty">条件に合う' + kindLabel + 'がありません。絞り込みを「すべて」に戻してください。</p>'; }
     ['must', 'want', 'low'].forEach(function (p) {
       var items = vis.filter(function (s) { return s.pri === p; });
       if (!items.length) return;
       var h = document.createElement('div');
       h.className = 'group-h ' + p;
-      h.innerHTML = PRI[p] + ' <span class="mono">' + items.length + '</span>';
+      h.innerHTML = '優先度 ' + PRI[p] + ' <span class="mono">' + items.length + '</span>';
       listEl.appendChild(h);
       var wrap = document.createElement('div');
       wrap.style.cssText = 'display:grid;gap:10px;margin-bottom:8px';
@@ -1226,7 +1264,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
 
     SPOTS.forEach(function (s) {
       var m = L.marker([s.lat, s.lng], { icon: pinIcon(s, false), riseOnHover: true, title: s.name });
-      m.bindPopup('<b>' + s.no + '. ' + esc(s.name) + '</b><br>' + PRI[s.pri] + '・' + AREAS[s.area].label +
+      m.bindPopup('<b>' + s.no + '. ' + esc(s.name) + '</b><br>優先度 ' + PRI[s.pri] + '・' + AREAS[s.area].label +
         '<br><a href="' + gmSearch(s.q) + '" target="_blank" rel="noopener">Googleマップで見る ↗</a>');
       m.on('click', function () { select(s.id, 'map'); });
       markers[s.id] = m;
@@ -1279,7 +1317,7 @@ footer.credit ul { margin: 4px 0 0; padding-left: 1.2em; }
     var kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>沖縄・石垣旅行 2026</name>\n' +
       vis.map(function (s) {
         return '<Placemark><name>' + x(s.no + '. ' + s.name) + '</name><description>' +
-          x(PRI[s.pri] + ' / ' + AREAS[s.area].label + ' / ' + CATS[s.cat] + ' — ' + s.note) +
+          x('優先度 ' + PRI[s.pri] + ' / ' + AREAS[s.area].label + ' / ' + CATS[s.cat] + ' — ' + s.note) +
           '</description><Point><coordinates>' + s.lng + ',' + s.lat + ',0</coordinates></Point></Placemark>';
       }).join('\n') + '\n</Document></kml>';
     var url = URL.createObjectURL(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }));
